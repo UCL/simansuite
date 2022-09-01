@@ -149,7 +149,6 @@ di `"`mlabel2'"'
 di `"`mlabel3'"'
 */
 
-
 preserve
 * keeps estimates data only
 qui drop if `rep'<0
@@ -342,7 +341,7 @@ foreach m in `dgmvalues' {
 
 				foreach k in `maxmethodvaluesplus1' {
 				 if "`j'" != "`k'" {
-					  twoway (functon x, range(`frtheta') lcolor(gs10)) (scatter `estimate'`j' `estimate'`k' if `dgm'==`m', ms(o) ///
+					  twoway (function x, range(`frtheta') lcolor(gs10)) (scatter `estimate'`j' `estimate'`k' if `dgm'==`m', ms(o) ///
 					  mlc(white%1) msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), `nodraw' `by' name(`estimate'`j'`k'dgm`m', replace) 
 					  twoway (function x, range(`frse') lcolor(gs10)) (scatter `se'`j' `se'`k' if `dgm'==`m', ms(o) mlc(white%1) ///
 					  msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), `nodraw' `by' name(`se'`j'`k'dgm`m', replace) 

@@ -430,19 +430,24 @@ if !mi(`"`options'"') {
 	}
 }
 
+set trace on
+set tracedepth 1
+* Took out	c(`connect' ...) from line `yvar' `xvar' `if' options and line `factorlist' `xvar' `if' options
+* as connector making the lines too thick, can not see detail
+
+di "`yvar'"
+
 * graph
 #delimit ;
 local cmd graph twoway 
 (line `yvar' `xvar' `if', 
 	`lcolor' `lpattern'	`lstyle' `lwidth'
-	c(`connect' ...)
 	)
 (line `factorlist' `xvar' `if', 
 	lcol(`legendcolor' ...)
 	lpattern(`legendpattern' ...)
 	lwidth(`legendwidth' ...)
 	lstyle(`legendstyle' ...)
-	c(`connect' ...) 
 	)
 	,
 	legend(order(`legend'))

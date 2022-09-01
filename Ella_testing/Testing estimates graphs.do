@@ -126,7 +126,7 @@ siman_blandaltman
 siman_blandaltman est se
 siman_blandaltman, by(dgm)
 siman_blandaltman, by(target)
-* To test metlist subset, create a dataset with more than 3 string method variables
+* To test methlist subset, create a dataset with more than 3 string method variables
 clear all
 cd N:\My_files\siman\Ian_example\
 use bvsim_all_out.dta, clear

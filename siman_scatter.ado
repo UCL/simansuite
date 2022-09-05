@@ -1,4 +1,5 @@
-*! version 1.2   14july2022
+*! version 1.3   05sep2022
+*  version 1.3   05sep2022   EMZ added additional error message
 *  version 1.2   14july2022  EMZ. Tidied up graph labels if 'by' option used.  Fixed bug if more than 1 dgm variable used.  Fixed bug so name() allowed if *                            user specifies.
 *  version 1.1   17mar2022   EMZ. Suppressed "DGM=1" from graph titles if only one dgm.
 *  version 1.0   9dec2019    Ella Marley-Zagar, MRC Clinical Trials Unit at UCL. Based on Tim Morris' simulation tutorial do file.
@@ -20,6 +21,12 @@ if "`simansetuprun'"!="1" {
 	di as error "siman_setup needs to be run first."
 	exit 498
 	}
+	
+* if both estimate and se are missing, give error message as program requires them for the graph(s)
+if mi("`estimate'") & mi("`se'") {
+    di as error "siman scatter requires either estimate or se to plot"
+	exit 498
+}
 
 * If data is not in long-long format, then reshape
 if `nformat'!=1 {

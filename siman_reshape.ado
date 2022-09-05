@@ -1,4 +1,5 @@
-*!  version 0.1   08june2020
+*!  version 0.2   05sep2022
+*   version 0.2   05sep2022     EMZ added additional error messages
 *   version 0.1   08june2020    Ella Marley-Zagar, MRC Clinical Trials Unit at UCL
 
 capture program drop siman_reshape
@@ -10,6 +11,12 @@ syntax, [LONGWIDE LONGLONG]
 
 foreach thing in `_dta[siman_allthings]' {
     local `thing' : char _dta[siman_`thing']
+}
+
+* if both estimate and se are missing, give error message as requires something to reshape
+if mi("`estimate'") & mi("`se'") {
+    di as error "siman reshape requires either estimate or se, otherwise nothing to reshape"
+	exit 498
 }
 
 * make a list of the optional elements that have been entered by the user, that would be stubs in the reshape

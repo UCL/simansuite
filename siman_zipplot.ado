@@ -1,4 +1,5 @@
-*! version 1.6   14july2022
+*! version 1.7   05sep2022
+*  version 1.7   05sep2022   EMZ added additional error message
 *  version 1.6   14july2022  EMZ fixed bug so name() allowed in call
 *  version 1.5   30june2022  EMZ fixed bug where axis crosses
 *  version 1.4   24mar2022   EMZ changes (suppress DGM=1 if no DGM/only 1 DGM)
@@ -24,6 +25,12 @@ if "`simansetuprun'"!="1" {
 	di as error "siman_setup needs to be run first."
 	exit 498
 	}
+	
+* if both estimate and se are missing, give error message as program requires them for the graph(s)
+if mi("`estimate'") | mi("`se'") {
+    di as error "siman zipplot requires estimate and se to plot"
+	exit 498
+}	
 
 * if true is missing, produce an error message
 if "`true'"=="" {

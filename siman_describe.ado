@@ -72,14 +72,16 @@ else local truetype "numeric"
 * For dgm description
 local dgmcount: word count `dgm'
 qui tokenize `dgm'
-forvalues j = 1/`dgmcount' {
-	qui tab ``j''
-	local nlevels = r(r)
-	local dgmvarsandlevels `"`dgmvarsandlevels'"' `"``j''"' `" (`nlevels') "'
-	if `j' == 1 local totaldgmnum = `nlevels'
-	else local totaldgmnum = `totaldgmnum'*`nlevels'
+if `dgmcreated' == 0 {
+	forvalues j = 1/`dgmcount' {
+		qui tab ``j''
+		local nlevels = r(r)
+		local dgmvarsandlevels `"`dgmvarsandlevels'"' `"``j''"' `" (`nlevels') "'
+		if `j' == 1 local totaldgmnum = `nlevels'
+		else local totaldgmnum = `totaldgmnum'*`nlevels'
+	}
 }
-if `dgmcreated' == 1 {
+else if `dgmcreated' == 1 {
 	local totaldgmnum = 0
 	local dgmvarsandlevels "none"
 }

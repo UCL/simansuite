@@ -1,4 +1,5 @@
-*! version 1.4   14july2022
+*! version 1.5   05sep2022
+*  version 1.5   05sep2022    EMZ added additional error message
 *  version 1.4   14july2022   EMZ. Corrected bug where mean bars were displaced downwards. Changed graph title so uses dgm label (not value) if exists.
 *							  Fixed bug so name() allowed if user specifies.
 *  version 1.3   17mar2022    EMZ. Suppressed "DGM=1" from graph titles if only one dgm.
@@ -28,6 +29,11 @@ if "`method'"=="" & "`simansetuprun'"=="1" {
 	exit 498
 	}
 	
+* if both estimate and se are missing, give error message as program requires them for the graph(s)
+if mi("`estimate'") & mi("`se'") {
+    di as error "siman swarm requires either estimate or se to plot"
+	exit 498
+}
 
 * If data is not in long-long format, then reshape to get method labels
 if `nformat'!=1 {

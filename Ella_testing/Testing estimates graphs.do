@@ -631,7 +631,7 @@ prog drop _all
 * Ian's testing Bland-Altman
 use http://www.homepages.ucl.ac.uk/~rmjwiww/stata/misc/MIsim, clear
 siman setup, rep(dataset) method(method)
-cap noi siman blandaltman                                               ********************** NEED CLEARER ERROR MSG **********************
+cap noi siman blandaltman                                               
 
 use http://www.homepages.ucl.ac.uk/~rmjwiww/stata/misc/MIsim, clear
 siman setup, rep(dataset) method(method) est(b) se(se)

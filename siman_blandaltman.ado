@@ -1,5 +1,5 @@
 *! version 1.5   05sep2022 
-*  version 1.5   05sep2022   EMZ bug fix allow norescale
+*  version 1.5   05sep2022   EMZ bug fix allow norescale, added extra error message
 *  version 1.4   14july2022  EMZ fixed bug so name() allowed in call.
 *  version 1.3   21mar2022   EMZ changes after Ian testing (supressing DGM = 1 if only 1 DGM)
 *  version 1.3   30june2022  EMZ changes to graph formatting from IW/TM testing
@@ -30,6 +30,12 @@ if "`method'"=="" {
 	di as error "The variable 'method' is missing so siman blandaltman can not be created.  Please create a variable in your dataset called method containing the method value(s)."
 	exit 498
 	}
+
+* if both estimate and se are missing, give error message as program requires them for the graph(s)
+if mi("`estimate'") & mi("`se'") {
+    di as error "siman blandaltman requires either estimate or se to plot"
+	exit 498
+}
 	
 * If data is not in long-long format, then reshape to get method labels
 if `nformat'!=1 {

@@ -1,4 +1,5 @@
-*! version 1.6   01sep2022
+*! version 1.7   05sep2022
+*  version 1.7   05sep2022    EMZ added additional error message
 *  version 1.6   01sep2022    EMZ fixed bug to allow scheme to be specified
 *  version 1.5   14july2022   EMZ fixed bug to allow name() in call
 *  version 1.4   30june2022   EMZ minor formatting of axes from IW/TM testing
@@ -28,6 +29,12 @@ if "`simansetuprun'"!="1" {
 	di as error "siman_setup needs to be run first."
 	exit 498
 	}
+	
+* if both estimate and se are missing, give error message as program requires them for the graph(s)
+if mi("`estimate'") & mi("`se'") {
+    di as error "siman scattercomparemethods requires either estimate or se to plot"
+	exit 498
+}	
 
 if "`method'"=="" {
 	di as error "The variable 'method' is missing so siman comparemethodsscatter can not be created.  Please create a variable in your dataset called method containing the method value(s)."

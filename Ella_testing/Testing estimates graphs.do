@@ -626,6 +626,16 @@ siman scatter if dgmA==0, by(dgmA dgmB)
 siman scatter, by(dgmB)
 * it is!
 
+clear all
+prog drop _all
+* Ian's testing Bland-Altman
+use http://www.homepages.ucl.ac.uk/~rmjwiww/stata/misc/MIsim, clear
+siman setup, rep(dataset) method(method)
+cap noi siman blandaltman                                               ********************** NEED CLEARER ERROR MSG **********************
 
+use http://www.homepages.ucl.ac.uk/~rmjwiww/stata/misc/MIsim, clear
+siman setup, rep(dataset) method(method) est(b) se(se)
+siman blandaltman // note implicit norescale: scales are same in the two graphs
+siman blandaltman, bygraphoptions(yrescale) // yrescale works
 
         

@@ -79,6 +79,10 @@ forvalues j = 1/`dgmcount' {
 	if `j' == 1 local totaldgmnum = `nlevels'
 	else local totaldgmnum = `totaldgmnum'*`nlevels'
 }
+if `dgmcreated' == 1 {
+	local totaldgmnum = 0
+	local dgmvarsandlevels "none"
+}
 
     di as text _newline _col(`titlewidth') "SUMMARY OF DATA"
     di as text "_____________________________________________________" _newline

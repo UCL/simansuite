@@ -9,6 +9,7 @@ siman_analyse
 
 * siman_lollyplot
 siman_lollyplot
+siman_lollyplot if estimand=="beta"
 siman_lollyplot, scheme(economist) title("New title")
 siman_lollyplot modelse power cover
 siman_lollyplot, gr(xtitle("New title"))

@@ -1,5 +1,6 @@
-*! version 1.5   14july2022
-*  version 1.5   14july2022   EMZ fixed bug to allow name() in call 
+*! version 1.6   05sep2022
+*  version 1.6   05sep2022   EMZ bug fix to allow if target == "x"
+*  version 1.5   14july2022  EMZ fixed bug to allow name() in call 
 *  version 1.4   11july2022  EMZ changed pm and perfeascode to _pm and _perfmeascode
 *  version 1.3   16may2022   EMZ bug fixing with graphical displays.  Added in graphoptions() for constituent graph options.
 *  version 1.2   24mar2022   EMZ further updates from IW testing
@@ -10,7 +11,6 @@
 /*
 Ella's notes:
 **************
-The by command will default to by(dgm) and one point/line is drawn per method.  I can't work out how to split by(dgm target) if user would like to.
 Not sure how to make it faster with -graph, by()- than with -graph combine-, have tried but not managed to get it to work as yet.
 */
 
@@ -183,6 +183,12 @@ else local ifplot "`listfive'"
 
 di as text "working...."
 
+if !mi("`if'") {
+    local ampersand = " &"
+	local if =  `"`if' `ampersand'"'
+}
+else local if "if"
+
 * create separate plots then graph combine.
 foreach pm of local tograph {
 	if !inlist(`pm',`ifplot') {
@@ -197,30 +203,30 @@ foreach pm of local tograph {
 
 					forvalues j = 1/`nmethodlabels' { 
 						if `methodstringindi'==0 {
-							local scatter`j' = `"(scatter `method' `estimate' if `method'==`j' & _pm==`pm' `if', mlab(thelab) mlabpos(1) mcol("scheme p`j'") mlabcol("scheme p`j'") msym(o))"'
+							local scatter`j' = `"(scatter `method' `estimate' `if' `method'==`j' & _pm==`pm', mlab(thelab) mlabpos(1) mcol("scheme p`j'") mlabcol("scheme p`j'") msym(o))"'
 							if `j'==1 local scatters `scatter`j''
 							else if `j'>=2 local scatters `scatters' `scatter`j''
 					
-							local spike`j' = `"(rspike `estimate' ref `method' if `method'==`j' & _pm==`pm' `if', lcol("scheme p`j'") hor)"'
+							local spike`j' = `"(rspike `estimate' ref `method' `if' `method'==`j' & _pm==`pm', lcol("scheme p`j'") hor)"'
 							if `j'==1 local spikes `spike`j''
 							else if `j'>=2 local spikes `spikes' `spike`j''	
 
-							local bound`j' = `"(scatter `method' `lci' if `method'==`j' & _pm==`pm' `if', msym(i) mlab(l) mlabpos(0) mcol("scheme p`j'") mlabcol("scheme p`j'")) (scatter `method' `uci' if `method'==`j' & _pm==`pm' `if', msym(i) mlab(r) mlabpos(0) mcol("scheme p`j'") mlabcol("scheme p`j'"))"'
+							local bound`j' = `"(scatter `method' `lci' `if' `method'==`j' & _pm==`pm', msym(i) mlab(l) mlabpos(0) mcol("scheme p`j'") mlabcol("scheme p`j'")) (scatter `method' `uci' `if' `method'==`j' & _pm==`pm', msym(i) mlab(r) mlabpos(0) mcol("scheme p`j'") mlabcol("scheme p`j'"))"'
 							if `j'==1 local bounds `bound`j''
 							else if `j'>=2 local bounds `bounds' `bound`j''	
 						} 
 			
 						else if `methodstringindi'==1 {
 										
-							local scatter`j' = `"(scatter numericmethod `estimate' if numericmethod==`j' & _pm==`pm' `if', mlab(thelab) mlabpos(1) mcol("scheme p`j'") mlabcol("scheme p`j'") msym(o))"'
+							local scatter`j' = `"(scatter numericmethod `estimate' `if' numericmethod==`j' & _pm==`pm', mlab(thelab) mlabpos(1) mcol("scheme p`j'") mlabcol("scheme p`j'") msym(o))"'
 							if `j'==1 local scatters `scatter`j''
 							else if `j'>=2 local scatters `scatters' `scatter`j''
 					
-							local spike`j' = `"(rspike `estimate' ref numericmethod if numericmethod==`j' & _pm==`pm' `if', lcol("scheme p`j'") hor)"'
+							local spike`j' = `"(rspike `estimate' ref numericmethod `if' numericmethod==`j' & _pm==`pm', lcol("scheme p`j'") hor)"'
 							if `j'==1 local spikes `spike`j''
 							else if `j'>=2 local spikes `spikes' `spike`j''	
 							
-							local bound`j' = `"(scatter numericmethod `lci' if numericmethod==`j' & _pm==`pm' `if', msym(i) mlab(l) mlabpos(0) mcol("scheme p`j'") mlabcol("scheme p`j'")) (scatter numericmethod `uci' if numericmethod==`j' & _pm==`pm' `if', msym(i) mlab(r) mlabpos(0) mcol("scheme p`j'") mlabcol("scheme p`j'"))"' 
+							local bound`j' = `"(scatter numericmethod `lci' `if' numericmethod==`j' & _pm==`pm', msym(i) mlab(l) mlabpos(0) mcol("scheme p`j'") mlabcol("scheme p`j'")) (scatter numericmethod `uci' `if' numericmethod==`j' & _pm==`pm', msym(i) mlab(r) mlabpos(0) mcol("scheme p`j'") mlabcol("scheme p`j'"))"' 
 							if `j'==1 local bounds `bound`j''
 							else if `j'>=2 local bounds `bounds' `bound`j''	
 						} 

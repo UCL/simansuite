@@ -1,4 +1,5 @@
-*! version 1.4   14july2022 
+*! version 1.5   05sep2022 
+*  version 1.5   05sep2022   EMZ bug fix allow norescale
 *  version 1.4   14july2022  EMZ fixed bug so name() allowed in call.
 *  version 1.3   21mar2022   EMZ changes after Ian testing (supressing DGM = 1 if only 1 DGM)
 *  version 1.3   30june2022  EMZ changes to graph formatting from IW/TM testing
@@ -365,7 +366,7 @@ if "`valtarget'" != "N/A" {
 			twoway (scatter diff mean if strthing == "`el'" & `byvarlist', `options')
 			,
 			xsize(5)
-			by(method, xrescale yrescale note("") iscale(1.1) title("Bland Altman, `eltitle', `bytitle'") `bygraphoptions') ///
+			by(method, note("") iscale(1.1) title("Bland Altman, `eltitle', `bytitle'") `bygraphoptions') ///
 			name( `name'_`byname'`el', replace)
 			;
 		#delimit cr
@@ -391,7 +392,7 @@ else {
 						twoway (scatter diff mean if strthing == "`el'" & `byvarlist', `options')
 						,
 						xsize(5)
-						by(method, xrescale yrescale note("") iscale(1.1) title("Bland Altman, `eltitle', `bytitle'") `bygraphoptions') ///
+						by(method, note("") iscale(1.1) title("Bland Altman, `eltitle', `bytitle'") `bygraphoptions') ///
 						name( `name'_`byname'`el', replace)
 						;
 						#delimit cr
@@ -401,7 +402,7 @@ else {
 						twoway (scatter diff mean if strthing == "`el'", `options')
 						,
 						xsize(5)
-						by(method, xrescale yrescale note("") iscale(1.1) title("Bland Altman, `eltitle'") `bygraphoptions') ///
+						by(method, note("") iscale(1.1) title("Bland Altman, `eltitle'") `bygraphoptions') ///
 						name( `name'_`el', replace)
 						;
 						#delimit cr

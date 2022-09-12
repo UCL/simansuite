@@ -10,6 +10,7 @@ siman_setup, rep(rep) dgm(dgm) target(estimand) method(method) estimate(est) se(
 siman_scatter, ytitle("test y-title") xtitle("test x-title") name("test") 
 siman_scatter, ytitle("test y-title") xtitle("test x-title")     
 siman_scatter 
+siman_scatter if dgm==2, name(siman_scatter_dgm2)
 
 * siman_swarm
 siman_swarm
@@ -637,5 +638,34 @@ use http://www.homepages.ucl.ac.uk/~rmjwiww/stata/misc/MIsim, clear
 siman setup, rep(dataset) method(method) est(b) se(se)
 siman blandaltman // note implicit norescale: scales are same in the two graphs
 siman blandaltman, bygraphoptions(yrescale) // yrescale works
+
+
+***************************************
+* Multiple dgms with multiple levels
+***************************************
+
+* Testing siman scatter
+*************************
+clear all
+prog drop _all
+cd N:\My_files\siman\GertaRucker\12874_2014_1136_MOESM1_ESM\
+use res.dta, clear
+siman_setup, rep(v1) dgm(theta rho pc tau2 k) method(peto g2 limf peters trimfill) estimate(exp) se(var2) true(theta)
+siman_scatter
+clear all
+prog drop _all
+cd N:\My_files\siman\GertaRucker\12874_2014_1136_MOESM1_ESM\
+use res.dta, clear
+siman_setup, rep(v1) dgm(theta rho pc tau2 k) method(peto g2 limf peters trimfill) estimate(exp) se(var2) true(theta)
+siman scatter, by(theta)
+siman scatter, by(tau2)
+siman_reshape, longlong
+siman scatter, by(method)
+siman scatter if method == "peto"
+siman scatter if theta==1, name(simanscatter_theta1, replace)
+siman scatter if theta==0.5, name(simanscatter_theta05, replace)
+siman scatter if method == "peto" & theta == 1
+
+
 
         

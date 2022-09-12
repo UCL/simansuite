@@ -1,4 +1,5 @@
-*! version 1.3   05sep2022
+*! version 1.4   12sep2022
+*  version 1.4   12sep2022   EMZ added to code so now allows scatter graphs split out by every dgm variable and level if multiple dgm variables declared
 *  version 1.3   05sep2022   EMZ added additional error message
 *  version 1.2   14july2022  EMZ. Tidied up graph labels if 'by' option used.  Fixed bug if more than 1 dgm variable used.  Fixed bug so name() allowed if *                            user specifies.
 *  version 1.1   17mar2022   EMZ. Suppressed "DGM=1" from graph titles if only one dgm.
@@ -16,7 +17,6 @@ foreach thing in `_dta[siman_allthings]' {
     local `thing' : char _dta[siman_`thing']
 }
 
-
 if "`simansetuprun'"!="1" {
 	di as error "siman_setup needs to be run first."
 	exit 498
@@ -27,6 +27,9 @@ if mi("`estimate'") & mi("`se'") {
     di as error "siman scatter requires either estimate or se to plot"
 	exit 498
 }
+
+tempfile origdata
+qui save `origdata'
 
 * If data is not in long-long format, then reshape
 if `nformat'!=1 {
@@ -110,7 +113,7 @@ foreach var of varlist `dgm' `target'  `method' {
 	qui gen ``var'equals' = "`var' = "
 	tempvar `var'title
 	qui egen ``var'title' = concat(``var'equals' `var')
-	local `var' ``var'title'
+	local `var'title ``var'title'
 *if "`by'"=="`var'" local by ``var'title'
 }
 
@@ -124,29 +127,45 @@ if !mi("`by'") {
 		local by `bylist'
 }
 
-if "`by'"=="" & `ndgmlabels' == 1 local by `target' `methodtitle' 
-else if "`by'"=="" & `ndgmlabels' != 1 local by `dgmtitle' `target' `methodtitle'
-local name = "name(simanscatter, replace)"
 
-* Can't tokenize/substr as many "" in the string
-if !mi(`"`options'"') {
-	tempvar _namestring
-	qui gen `_namestring' = `"`options'"'
-	qui split `_namestring',  parse(`"name"')
-	local options = `_namestring'1
-	cap confirm var `_namestring'2
-	if !_rc {
-		local namestring = `_namestring'2
-		local name = `"name`namestring'"'
-	}
-}
 
 * scatter plot
-twoway scatter `varlist', msym(o) msize(small) mcol(%30) by(`by', note("") `bygraphoptions') `name' `options'
-* twoway scatter `se' `estimate', `options' by(`method' `dgm', cols(2) yrescale xrescale)
 
+* if dgm is defined by multiple variables, default is to plot scatter graphs for each dgm variable, split out by each level
+
+if `numberdgms'!=1 & mi("`by'") & mi("`if'") {
+	
+	foreach dgmvar in `dgm' {
+		twoway scatter `varlist', msym(o) msize(small) mcol(%30) by(`dgmvar', note("") `bygraphoptions') name(simanscatter_dgm_`dgmvar') `options'
+	}
+}
+* if dgm is defined by 1 variable
+else {
+	
+	if "`by'"=="" & `ndgmlabels' == 1 local by `target' `methodtitle' 
+	else if "`by'"=="" & `ndgmlabels' != 1 local by `dgmtitle' `target' `methodtitle'
+	local name = "name(simanscatter, replace)"
+
+	* Can't tokenize/substr as many "" in the string
+	if !mi(`"`options'"') {
+		tempvar _namestring
+		qui gen `_namestring' = `"`options'"'
+		qui split `_namestring',  parse(`"name"')
+		local options = `_namestring'1
+		cap confirm var `_namestring'2
+			if !_rc {
+				local namestring = `_namestring'2
+				local name = `"name`namestring'"'
+			}
+	}
+	
+	
+	twoway scatter `varlist', msym(o) msize(small) mcol(%30) by(`by', note("") `bygraphoptions') `name' `options' 
+}
 
 restore
+
+use `origdata', clear
 
 end
 

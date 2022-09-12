@@ -1,5 +1,0 @@
-siman notes IW 2022-03-03
-
-siman setup from wide-wide: seems to need one true() per target and method? but should be one per target?
-
-siman table: parsing of if at l14-18 seems wrong

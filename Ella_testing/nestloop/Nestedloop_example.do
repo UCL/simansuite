@@ -121,3 +121,5 @@ siman_setup, rep(v1) dgm(theta rho pc tau2 k) target(beta gamma) estimate(exp) s
 * error message as required
 
 
+************************
+* siman scatter if rho==1

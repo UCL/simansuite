@@ -1,4 +1,5 @@
-*!  version 0.2   05sep2022
+*!  version 0.3   26sep2022
+*   version 0.3   26sep2022     EMZ fixed bug when transforming to longwide with dgm defined by multiple variables and true in both dgm() and true()
 *   version 0.2   05sep2022     EMZ added additional error messages
 *   version 0.1   08june2020    Ella Marley-Zagar, MRC Clinical Trials Unit at UCL
 
@@ -7,7 +8,6 @@ program define siman_reshape, rclass
 version 15
 
 syntax, [LONGWIDE LONGLONG]
-
 
 foreach thing in `_dta[siman_allthings]' {
     local `thing' : char _dta[siman_`thing']
@@ -182,6 +182,11 @@ else if `nformat'==1 & `nmethod'!=0 {
 	if "`ntruevalue'"=="single" local optionlist `estimate' `se' `df' `ci' `p'  
 	else if "`ntruevalue'"=="multiple" local optionlist `estimate' `se' `df' `ci' `p' `true' 
 	
+	* if dgm is defined by multiple variables, and the true value is included in dgm() as well as true() [e.g. for siman trellis and nestloop]
+	* then only include true in the dgm value for the reshape (-reshape- will not accept it twice)
+	local numberdgms: word count `dgm'
+	if `numberdgms'!=1 local optionlist `estimate' `se' `df' `ci' `p'
+
 
 	* Take out underscores at the end of method value labels if there are any.  
 	* Need to tokenize the method variable again as might have changed in a previous reshape.
@@ -225,6 +230,7 @@ else if `nformat'==1 & `nmethod'!=0 {
 			forvalues i=1/`nmethod' {
 				local m`i' = "``i''"
 				}
+				
 
 		* check if method elements are numeric (e.g. 1 2) or string (e.g. A B) for reshape
 		local string = 0

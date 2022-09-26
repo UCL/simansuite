@@ -16,7 +16,9 @@ siman_scatter if dgm==2, name(siman_scatter_dgm2)
 siman_swarm
 siman_swarm, meanoff scheme(s1color) bygraphoptions(title("main-title")) graphoptions(ytitle("test y-title"))
 siman_swarm, scheme(economist) bygraphoptions(title("main-title")) graphoptions(ytitle("test y-title") xtitle("test x-title"))
-siman_swarm, graphoptions(ytitle("test y-title") xtitle("test x-title")) combinegraphoptions(name("test2", replace))  
+siman_swarm, graphoptions(ytitle("test y-title") xtitle("test x-title")) combinegraphoptions(name("test2", replace))     
+siman_swarm if dgm == 1   
+
 
 *siman_zipplot
 siman_zipplot
@@ -83,10 +85,11 @@ siman_setup, rep(dnum) dgm(dgm) est(est) se(se) method(method) target(target)
 siman_comparemethodsscatter
 siman_comparemethodsscatter, by(target)  
 siman_blandaltman est se
-siman_blandaltman, by(dgm)
+siman_blandaltman, by(dgm)   
+siman blandaltman if target == "gamma"                     
 siman_blandaltman, bygraphoptions(norescale)
 siman_blandaltman, methlist(2 8)
-siman_blandaltman, methlist(3 7) by(dgm)
+siman_blandaltman, methlist(3 7) by(dgm)                  
 siman_blandaltman
 siman_blandaltman, ytitle("test y-title") xtitle("test x-title") name("yabberdabberdoo") 
 siman_blandaltman, ytitle("test y-title") xtitle("test x-title")
@@ -125,8 +128,7 @@ siman_setup, rep(rep) dgm(dgm) target(beta gamma) method(A_ B_) estimate(est) se
 siman_comparemethodsscatter 
 siman_blandaltman
 siman_blandaltman est se
-siman_blandaltman, by(dgm)
-siman_blandaltman, by(target)
+siman_blandaltman, by(dgm)                                                                                
 * To test methlist subset, create a dataset with more than 3 string method variables
 clear all
 cd N:\My_files\siman\Ian_example\
@@ -169,8 +171,7 @@ label values dgmnew dgmlabelvalues
 drop dgm
 rename dgmnew dgm
 siman setup, rep(idrep) dgm(dgm) method(method) est(theta) se(se)
-siman swarm
-
+siman swarm                                                         
 
 * Combinations of #methods and #targets for testing matrix
 ************************************************************
@@ -640,9 +641,9 @@ siman blandaltman // note implicit norescale: scales are same in the two graphs
 siman blandaltman, bygraphoptions(yrescale) // yrescale works
 
 
-***************************************
-* Multiple dgms with multiple levels
-***************************************
+**********************************************************
+* DGM defined by multiple variables with multiple levels
+**********************************************************
 
 * Testing siman scatter
 *************************
@@ -666,6 +667,80 @@ siman scatter if theta==1, name(simanscatter_theta1, replace)
 siman scatter if theta==0.5, name(simanscatter_theta05, replace)
 siman scatter if method == "peto" & theta == 1
 
+
+
+* Testing siman swarm
+*************************
+clear all
+prog drop _all
+cd N:\My_files\siman\GertaRucker\12874_2014_1136_MOESM1_ESM\
+use res.dta, clear
+siman_setup, rep(v1) dgm(theta rho pc k) method(peto g2) estimate(exp) se(var2) true(theta)
+siman_swarm                                                          
+clear all
+prog drop _all
+cd N:\My_files\siman\GertaRucker\12874_2014_1136_MOESM1_ESM\
+use res.dta, clear
+siman_setup, rep(v1) dgm(theta rho pc k) method(peto g2 limf) estimate(exp) se(var2) true(theta)
+siman swarm, by(theta)              
+siman swarm, by(k)
+siman_reshape, longlong
+siman swarm if method == "peto" | method == "limf"   
+siman swarm if (method == "peto" | method == "limf"), by(theta) combinegraphoptions(name(simanswarm_theta1, replace))                  
+siman swarm if (method == "peto" | method == "limf"), by(k)
+
+* Testing siman blandaltman
+****************************
+clear all
+prog drop _all
+cd N:\My_files\siman\GertaRucker\12874_2014_1136_MOESM1_ESM\
+use res.dta, clear
+keep v1 theta rho pc k exppeto expg2 var2peto var2g2
+* theta needs to be in integer format for levelsof command to work (doesn't accept non-integer values), so make integer values with non-integer labels
+gen theta_new=2
+replace theta_new=1 if theta == 0.5
+replace theta_new=3 if theta == 0.75
+replace theta_new=4 if theta == 1 
+label define theta_new 1 "0.5" 2 "0.67" 3 "0.75" 4 "1"
+label values theta_new theta_new
+label var theta_new "theta categories"
+*br theta theta_new
+drop theta
+rename theta_new theta
+siman_setup, rep(v1) dgm(theta rho pc k) method(peto g2) estimate(exp) se(var2) true(theta)
+*siman reshape, longlong
+*siman reshape, longwide
+siman_blandaltman
+
+clear all
+prog drop _all
+cd N:\My_files\siman\GertaRucker\12874_2014_1136_MOESM1_ESM\
+use res.dta, clear
+gen theta_new=2
+replace theta_new=1 if theta == 0.5
+replace theta_new=3 if theta == 0.75
+replace theta_new=4 if theta == 1 
+label define theta_new 1 "0.5" 2 "0.67" 3 "0.75" 4 "1"
+label values theta_new theta_new
+label var theta_new "theta categories"
+drop theta
+rename theta_new theta
+keep v1 theta rho pc k exppeto expg2 var2peto var2g2 explimf var2limf
+siman_setup, rep(v1) dgm(theta rho pc k) method(peto g2 limf) estimate(exp) se(var2) true(theta)
+siman blandaltman, by(theta)              
+siman blandaltman, by(k)
+siman reshape, longlong
+siman blandaltman if method == "peto" | method == "limf"  
+siman blandaltman if (method == "peto" | method == "limf"), by(k) 
+siman blandaltman if (method == "peto" | method == "limf"), by(theta) name("simanswarm_new", replace)                  
+
+
+
+
+/*
+siman reshape, longlong
+bysort theta method: gen sortvar = _n
+*/
 
 
         

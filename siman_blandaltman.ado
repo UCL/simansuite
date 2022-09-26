@@ -1,4 +1,5 @@
-*! version 1.5   05sep2022 
+*! version 1.6   26sep2022 
+*  version 1.6   26sep2022   EMZ added to code so now allows graphs split out by every dgm variable and level if multiple dgm variables declared.
 *  version 1.5   05sep2022   EMZ bug fix allow norescale, added extra error message
 *  version 1.4   14july2022  EMZ fixed bug so name() allowed in call.
 *  version 1.3   21mar2022   EMZ changes after Ian testing (supressing DGM = 1 if only 1 DGM)
@@ -36,6 +37,9 @@ if mi("`estimate'") & mi("`se'") {
     di as error "siman blandaltman requires either estimate or se to plot"
 	exit 498
 }
+
+tempfile origdata
+qui save `origdata'
 	
 * If data is not in long-long format, then reshape to get method labels
 if `nformat'!=1 {
@@ -173,12 +177,16 @@ if `methodstringindi'==1 & mi("`methlist'") {
 	qui encode `method', generate(numericmethod)	
 	qui drop `method'
 	qui rename numericmethod method
-	local method = method
+	local method = "method"
 	}
 
 * Comparing each method vs. each other method
 if !mi("`methlist'") local nummethod = `count'
 
+* Have the first method as the 'reference' method by default, so if have methods A, B, C and D, then calculate B-A, C-A, D-A.
+* check number of methods hasn't changed (for example if the 'if' syntax has been used)
+qui tab `method'
+local nummethodloop = `r(r)'
 
 * If data is not in long-wide format, then reshape for graphs
 qui siman reshape, longwide
@@ -189,8 +197,7 @@ foreach thing in `_dta[siman_allthings]' {
 	
 	
 if mi("`methlist'") {		
-	* Have the first method as the 'reference' method by default, so if have methods A, B, C and D, then calculate B-A, C-A, D-A.
-		forvalues j = 2/`nummethod' {
+		forvalues j = 2/`nummethodloop' {
 			foreach s in `estimate' `se' {
 					qui gen float diff`s'`mlabel`j'' = `s'`j' - `s'1									
 					qui gen float mean`s'`mlabel`j'' = (`s'`j'+`s'1)/2
@@ -254,174 +261,218 @@ if `dgmcreated' == 1 {
 	local dgm "dgm"
 	local ndgm=1
 }
-* if only 1 dgm in the data, set ndgm to be equal to the number of levels of dgm
-if `ndgm' == 1 {
+
+* Need to know number of dgms for later on
+local numberdgms: word count `dgm'
+if `numberdgms'==1 {
 	qui tab `dgm'
 	local ndgm = `r(r)'
-}	
-
-* Need to know what format dgm is in (string or numeric) for the below code
-local dgmstringindi = 0
-capture confirm string variable `dgm'
-if !_rc local dgmstringindi = 1
-
-* Get dgm label values
-qui labelsof `dgm'
-qui ret list
-
-if `"`r(labels)'"'!="" {
-	local 0 = `"`r(labels)'"'
-
-	forvalues i = 1/`ndgm' {  
-		gettoken dlabel`i' 0 : 0, parse(": ")
-	}
 }
-else {
-qui levels `dgm', local(levels)
-tokenize `"`levels'"'
+if `numberdgms'!=1 local ndgm = `numberdgms'
+
+if `numberdgms'==1 {
+	* Need to know what format dgm is in (string or numeric) for the below code
+	local dgmstringindi = 0
+	capture confirm string variable `dgm'
+	if !_rc local dgmstringindi = 1
+}
+else local dgmstringindi = 1
+
+* for 'by' syntax
+
+if !mi("`by'") {
+	local dgmbyvar = "`by'"
+}
+else local dgmbyvar = "`dgm'"
+
+foreach dgmvar in `dgmbyvar' {
 	
-	if `dgmstringindi'==0 {
+	local dgmlabels = 0
 	
-		forvalues i = 1/`ndgm' {  
-			local dlabel`i' `i'
+	qui tab `dgmvar'
+	local ndgmvar = `r(r)'
+
+	* Get dgm label values
+	cap qui labelsof `dgmvar'
+	cap qui ret list
+
+	if `"`r(labels)'"'!="" {
+		local 0 = `"`r(labels)'"'
+
+		forvalues i = 1/`ndgmvar' {  
+			gettoken `dgmvar'dlabel`i' 0 : 0, parse(": ")
+			local dgmlabels = 1
 		}
 	}
-	else if `dgmstringindi'==1 {
-	
-		forvalues i = 1/`ndgm' {  
-			local dlabel`i' ``i''
-		}
+	else {
+	local dgmlabels = 0
+	qui levels `dgmvar', local(levels)
+	tokenize `"`levels'"'
 		
-	}
-}
-
-qui tab `dgm'
-local ndgmlabels = `r(r)'
-
-if mi(`"`options'"') {
-	local options mlc(white%1) msym(O) msize(tiny)
-	}
-	
-local name = "simanblandaltman"
-
-* Can't tokenize/substr as many "" in the string
-if !mi(`"`options'"') {
-	tempvar _namestring
-	qui gen `_namestring' = `"`options'"'
-	qui split `_namestring',  parse(`"name"')
-	local options = `_namestring'1
-	cap confirm var `_namestring'2
-	if !_rc {
-		local namestring = `_namestring'2
-		local name = `namestring'
-	}
-}
-
-	
-local targetstringindi = 0	
-* If target is not missing	
-if "`valtarget'" != "N/A" {
-	forvalues d = 1/`ndgm' {
-		foreach t in `valtarget' {
-				foreach el in `varlist' {
-
-		* determine if target is numeric or not
-
-		cap confirm number `t'
-		if _rc local targetstringindi = 1
-/*		* also check labels as could be numerical data with string labels
-		qui labelsof `target'
-		tokenize `"`r(values)'"'
-		cap confirm number `1'
-		if _rc local targetstringindi = 1
-		if !_rc local targetstringindi = 0 */
+		if `dgmstringindi'==0 {
 		
-		* graph titles
-		if "`el'"=="`estimate'" local eltitle = "`estimate' "
-		else if "`el'"=="`se'" local eltitle = "`se' " 
-
-		if `ndgmlabels' > 1 & ("`by'"=="" | "`by'"=="`dgm' `target'") {
-			local bytitle = "DGM = `dlabel`d'', Target = `t'"
-			if `targetstringindi' == 1 local byvarlist = `"`dgm'==`d' & `target'=="`t'""'
-			else local byvarlist = `"`dgm'==`d' & `target'==`t'"'
-			local byname = "`d'`t'"
-		}
-		else if `ndgmlabels' == 1 & ("`by'"=="" | "`by'"=="`dgm' `target'")  {
-			local bytitle = "Target = `t'"
-			if `targetstringindi' == 1 local byvarlist = `"`target'=="`t'""'
-			else local byvarlist = `"`target'==`t'"'
-			local byname = "`t'"
-		}
-		else if "`by'"=="`dgm'" {
-			local bytitle = "DGM = `dlabel`d''"
-			local byvarlist = `"`dgm'==`d'"'
-			local byname = `d'
-		}
-		else if "`by'"=="`target'" {
-			local bytitle = "Target = `t'"
-			if `targetstringindi' == 1 local byvarlist = `"`target'=="`t'""'
-			else local byvarlist = `"`target'==`t'"'
-			local byname = "`t'"
-		}
-		else if "`by'"=="`target' `dgm'" {
-			di as err "'by' nesting order should be by(dgm target)"
-			exit 198
-		}
-
-		#delimit ;
-			twoway (scatter diff mean if strthing == "`el'" & `byvarlist', `options')
-			,
-			xsize(5)
-			by(method, note("") iscale(1.1) title("Bland Altman, `eltitle', `bytitle'") `bygraphoptions') ///
-			name( `name'_`byname'`el', replace)
-			;
-		#delimit cr
+			forvalues i = 1/`ndgmvar' {  
+				local `dgmvar'dlabel`i' `i'
 			}
-		}    
-	}   
-}
-else {
-		forvalues d = 1/`ndgm' {
-				foreach el in `varlist' {
-
-					* graph titles
-					if "`el'"=="`estimate'" local eltitle = "`est' "
-					else if "`el'"=="`se'" local eltitle = "`se' " 
-
-					if `ndgmlabels' > 1 & ("`by'"=="" | "`by'"=="`dgm'") {
-						local bytitle = "DGM = `dlabel`d''"
-						local byvarlist = `"`dgm'==`d'"'
-						local byname = "`d'"
-					}	
-					if `ndgmlabels' > 1 {
-					   #delimit ;
-						twoway (scatter diff mean if strthing == "`el'" & `byvarlist', `options')
-						,
-						xsize(5)
-						by(method, note("") iscale(1.1) title("Bland Altman, `eltitle', `bytitle'") `bygraphoptions') ///
-						name( `name'_`byname'`el', replace)
-						;
-						#delimit cr
-					}
-					else {
-						#delimit ;
-						twoway (scatter diff mean if strthing == "`el'", `options')
-						,
-						xsize(5)
-						by(method, note("") iscale(1.1) title("Bland Altman, `eltitle'") `bygraphoptions') ///
-						name( `name'_`el', replace)
-						;
-						#delimit cr
-					}
+		}
+		else if `dgmstringindi'==1 {
 		
-			} 
-	}   
-}
+			forvalues i = 1/`ndgmvar' {  
+				local `dgmvar'dlabel`i' ``i''
+			}
+			
+		}
+	}
 
-restore   
+	qui tab `dgmvar'
+	local n`dgmvar'labels = `r(r)'
+
+	if mi(`"`options'"') {
+		local options mlc(white%1) msym(O) msize(tiny)
+		}
+		
+	local name = "simanblandaltman"
+
+	* Can't tokenize/substr as many "" in the string
+	if !mi(`"`options'"') {
+		tempvar _namestring
+		qui gen `_namestring' = `"`options'"'
+		qui split `_namestring',  parse(`"name"')
+		local options = `_namestring'1
+		cap confirm var `_namestring'2
+		if !_rc {
+			local namestring = `_namestring'2
+			local name = `namestring'
+		}
+	}
+	
+	local targetstringindi = 0	
+	* If target is not missing	
+	if "`valtarget'" != "N/A" {
+		
+		* check number of targets in case 'if' syntax has been applied
+		qui tab `target',m
+		local ntargetlabels = `r(r)'
+
+		qui levels `target', local(levels)
+		tokenize `"`levels'"'
+		forvalues e = 1/`ntargetlabels' {
+			local tarlabel`e' = "``e''"
+			if `e'==1 local valtargetloop `tarlabel`e''
+			else if `e'>=2 local valtargetloop `valtargetloop' `tarlabel`e''
+			}
+		
+		forvalues d = 1/`ndgmvar' {
+			foreach t in `valtargetloop' {
+					foreach el in `varlist' {
+
+			* determine if target is numeric or not
+			cap confirm number `t'
+			if _rc local targetstringindi = 1
+	/*		* also check labels as could be numerical data with string labels
+			qui labelsof `target'
+			tokenize `"`r(values)'"'
+			cap confirm number `1'
+			if _rc local targetstringindi = 1
+			if !_rc local targetstringindi = 0 */
+			
+			* graph titles
+			if "`el'"=="`estimate'" local eltitle = "`estimate' "
+			else if "`el'"=="`se'" local eltitle = "`se' " 
+
+			if `n`dgmvar'labels' > 1 & ("`by'"=="" | "`by'"=="`dgmvar' `target'") {
+				local bytitle = "DGM = ``dgmvar'dlabel`d'', Target = `t'"
+				
+				if `dgmlabels' == 1 {						
+					if `targetstringindi' == 1 local byvarlist = `"`dgmvar'==`d' & `target'=="`t'""'
+					else local byvarlist = `"`dgmvar'==`d' & `target'==`t'"'
+				}				
+				else if `dgmlabels' == 0 {						
+					if `targetstringindi' == 1 local byvarlist = `"`dgmvar'== ``dgmvar'dlabel`d'' & `target'=="`t'""'
+					else local byvarlist = `"`dgmvar'== ``dgmvar'dlabel`d'' & `target'==`t'"'
+				}				
+				if `numberdgms' > 1 local byname = "`dgmvar'`d'`t'"
+				else local byname = "`d'`t'"
+			}
+			else if `n`dgmvar'labels' == 1 & ("`by'"=="" | "`by'"=="`dgmvar' `target'")  {
+				local bytitle = "Target = `t'"
+				if `targetstringindi' == 1 local byvarlist = `"`target'=="`t'""'
+				else local byvarlist = `"`target'==`t'"'
+				local byname = "`t'"
+			}
+			else if "`by'"=="`dgmvar'" {
+				local bytitle = "DGM = ``dgmvar'dlabel`d''"
+				if `dgmlabels' == 1 local byvarlist = `"`dgmvar'==`d'"'
+				else if `dgmlabels' == 0 local byvarlist = `"`dgmvar'==``dgmvar'dlabel`d''"'
+				if `numberdgms' > 1 local byname = `dgmvar'`d'
+				else local byname = `d'
+			}
+			else if "`by'"=="`target'" {
+				local bytitle = "Target = `t'"
+				if `targetstringindi' == 1 local byvarlist = `"`target'=="`t'""'
+				else local byvarlist = `"`target'==`t'"'
+				local byname = "`t'"
+			}
+			else if "`by'"=="`target' `dgmvar'" {
+				di as err "'by' nesting order should be by(dgm target)"
+				exit 198
+			}
+
+			#delimit ;
+				twoway (scatter diff mean if strthing == "`el'" & `byvarlist', `options')
+				,
+				xsize(5)
+				by(method, note("") iscale(1.1) title("Bland Altman, `eltitle', `bytitle'") `bygraphoptions') ///
+				name( `name'_`byname'`el', replace)
+				;
+			#delimit cr
+				}
+			}    
+		}   
+	}
+	else {
+			forvalues d = 1/`ndgmvar' {
+					foreach el in `varlist' {
+
+						* graph titles
+						if "`el'"=="`estimate'" local eltitle = "`estimate' "
+						else if "`el'"=="`se'" local eltitle = "`se' " 
+
+						if `n`dgmvar'labels' > 1 & ("`by'"=="" | "`by'"=="`dgmvar'") {
+							local bytitle = "DGM = ``dgmvar'dlabel`d''"
+							if `dgmlabels' == 1 local byvarlist = `"`dgmvar'==`d'"'
+							else if `dgmlabels' == 0 local byvarlist = `"`dgmvar'==``dgmvar'dlabel`d''"'
+							if `numberdgms' > 1 local byname = "`dgmvar'`d'"
+							else local byname = "`d'"
+						}	
+						if `n`dgmvar'labels' > 1 {
+						   #delimit ;
+							twoway (scatter diff mean if strthing == "`el'" & `byvarlist', `options')
+							,
+							xsize(5)
+							by(method, note("") iscale(1.1) title("Bland Altman, `eltitle', `bytitle'") `bygraphoptions') ///
+							name( `name'_`byname'`el', replace)
+							;
+							#delimit cr
+						}
+						else {
+							#delimit ;
+							twoway (scatter diff mean if strthing == "`el'", `options')
+							,
+							xsize(5)
+							by(method, note("") iscale(1.1) title("Bland Altman, `eltitle'") `bygraphoptions') ///
+							name( `name'_`el', replace)
+							;
+							#delimit cr
+						}
+			
+				} 
+		}   
+	}
+}
+restore 
+
+use `origdata', clear  
 
 end
-
-*twoway (scatter diff mean, `options' by(`dgm' `target'))
-*by(method, xrescale yrescale note("") iscale(1.1) title("Bland Altman, `eltitle', DGM = `dlabel`d'', Target = `t'") `bygraphoptions') ///
 

@@ -1,5 +1,6 @@
-*! version 1.5   05sep2022
-*  version 1.5   05sep2022    EMZ added additional error message
+*! version 1.6   26sep2022
+*  version 1.6   26sep2022    EMZ added to code so now allows scatter graphs split out by every dgm variable and level if multiple dgm variables declared.
+*  version 1.5   05sep2022    EMZ added additional error message.
 *  version 1.4   14july2022   EMZ. Corrected bug where mean bars were displaced downwards. Changed graph title so uses dgm label (not value) if exists.
 *							  Fixed bug so name() allowed if user specifies.
 *  version 1.3   17mar2022    EMZ. Suppressed "DGM=1" from graph titles if only one dgm.
@@ -34,6 +35,9 @@ if mi("`estimate'") & mi("`se'") {
     di as error "siman swarm requires either estimate or se to plot"
 	exit 498
 }
+
+tempfile origdata
+qui save `origdata'
 
 * If data is not in long-long format, then reshape to get method labels
 if `nformat'!=1 {
@@ -85,7 +89,12 @@ if `numberdgms'==1 {
 if `numberdgms'!=1 local ndgm = `numberdgms'
 
 
-if `nummethod' < 2 {
+* check number of methods (for example if the 'if' syntax has been used)
+qui tab `method'
+local nummethodnew = `r(r)'
+
+
+if `nummethodnew' < 2 {
 	di as error "There are not enough methods to compare, siman swarm requires at least 2 methods."
 	exit 498
 	}
@@ -110,7 +119,7 @@ qui ret list
 if "`r(labels)'"!="" {
 	local 0 = `"`r(labels)'"'
 
-	forvalues i = 1/`nummethod' {  
+	forvalues i = 1/`nummethodnew' {  
 		gettoken mlabel`i' 0 : 0, parse(": ")
 		if `i'==1 local mgraphlabels `mlabel`i''
 		else if `i'>1 local mgraphlabels `mgraphlabels' `mlabel`i''
@@ -122,7 +131,7 @@ tokenize `"`levels'"'
 	
 	if `methodstringindi'==0 {
 	
-		forvalues i = 1/`nummethod' {  
+		forvalues i = 1/`nummethodnew' {  
 			local mlabel`i' "Method `i'"
 			if `i'==1 local mgraphlabels `mlabel`i''
 			else if `i'>1 local mgraphlabels `mgraphlabels' `mlabel`i''
@@ -130,7 +139,7 @@ tokenize `"`levels'"'
 	}
 	else if `methodstringindi'==1 {
 	
-		forvalues i = 1/`nummethod' {  
+		forvalues i = 1/`nummethodnew' {  
 			local mlabel`i' "Method ``i''"
 			if `i'==1 local mgraphlabels `"`mlabel`i''"'
 			else if `i'>1 local mgraphlabels `mgraphlabels' `"`mlabel`i''"'
@@ -170,123 +179,200 @@ if `methodstringindi'==1 {
 di as text "working....."
 
 * For a nicer presentation and better better use of space
-local nummethodminus1 = `nummethod'-1
-local nummethodplus1 = `nummethod'+1
+local nummethodminus1 = `nummethodnew'-1
+local nummethodplus1 = `nummethodnew'+1
 
+if `numberdgms'==1 {
 
-local maxrep = _N
-forvalues g = 1/`nummethod' {
-	local step = `maxrep'/`nummethodplus1'
-	if `g'==1 qui gen newidrep = `rep' if `method' == `g'
-	else qui replace newidrep = (`rep'-1)+ ceil((`g'-1)*`step') + 1 if `method' == `g'
-	qui tabstat newidrep if `method' == `g', s(p50) save
-	qui matrix list r(StatTotal) 
-	local median`g' = r(StatTotal)[1,1]
-	local ygraphvalue`g' = ceil(`median`g'')
-	local labelvalues `labelvalues' `ygraphvalue`g'' "`mlabel`g''"
-	if `g'==`nummethod' label define newidreplab `labelvalues'
+		local maxrep = _N
+		forvalues g = 1/`nummethodnew' {
+		local step = `maxrep'/`nummethodplus1'
+		if `g'==1 qui gen newidrep`dgm' = `rep' if `method' == `g'
+		else qui replace newidrep`dgm' = (`rep'-1)+ ceil((`g'-1)*`step') + 1 if `method' == `g'
+		qui tabstat newidrep`dgm' if `method' == `g', s(p50) save
+		qui matrix list r(StatTotal) 
+		local median`g' = r(StatTotal)[1,1]
+		local ygraphvalue`g' = ceil(`median`g'')
+		local labelvalues`dgm' `labelvalues`dgm'' `ygraphvalue`g'' "`mlabel`g''"
+		if `g'==`nummethodnew' label define newidreplab`dgm' `labelvalues`dgm''
+	}
 }
+else {
+	foreach dgmvar in `dgm' {
+		bysort `dgmvar' `method' `target': gen `dgmvar'rep = _n
+		local `dgmvar'rep = `dgmvar'rep
 
+		local maxrep = _N
+		forvalues g = 1/`nummethodnew' {
+		local step = `maxrep'/`nummethodplus1'
+		if `g'==1 qui gen newidrep`dgmvar' = ``dgmvar'rep' if `method' == `g'
+		else qui replace newidrep`dgmvar' = (``dgmvar'rep'-1)+ ceil((`g'-1)*`step') + 1 if `method' == `g'
+		qui tabstat newidrep`dgmvar' if `method' == `g', s(p50) save
+		qui matrix list r(StatTotal) 
+		local median`g'`dgmvar' = r(StatTotal)[1,1]
+		local ygraphvalue`g'`dgmvar' = ceil(`median`g'`dgmvar'')
+		local labelvalues`dgmvar' `labelvalues`dgmvar'' `ygraphvalue`g'`dgmvar'' "`mlabel`g''"
+		if `g'==`nummethodnew' label define newidreplab`dgmvar' `labelvalues`dgmvar''
+	}
+ }
+}
 
 * For the purposes of the graphs below, if dgm is missing in the dataset then set
 * the number of dgms to be 1.
-if "`dgm'"=="" local ndgm=1 
+if "`dgm'"=="" local ndgm=1
 
-local dgmlabelindi=0
-qui labelsof `dgm'
-qui ret list
-if !mi("`r(labels)'") local dgmlabelindi=1	
+local byorig = "`by'"
 
 *create a variable with DGM = 'dgm' for use in the graphs if more than one dgm
 * dgm has to be numerical as defined in siman setup
+
+if !mi("`by'") {
+	local dgmbyvar = "`by'"
+}
+else local dgmbyvar = "`dgm'"
+
 if `ndgm' != 1 { 
-		tempvar dgmlabel
-		if `dgmlabelindi'== 1 qui decode `dgm', gen(`dgmlabel')
-		else qui gen `dgmlabel' = `dgm'
-		tempvar dgmequals
-		qui gen `dgmequals' = "DGM: "
-		tempvar dgmtitle
-		qui egen `dgmtitle' = concat(`dgmequals' `dgmlabel')
-		if "`by'"=="" local by = "`dgmtitle'"
 
+	foreach dgmvar in `dgmbyvar' { 
+		
+		if `numberdgms'==1 {
+		
+			local dgmlabelindi=0
+			cap qui labelsof `dgmvar'
+			cap qui ret list
+			if !mi("`r(labels)'") local dgmlabelindi=1	
+			
+		
+			tempvar dgmlabel`dgmvar'
+			if `dgmlabelindi'== 1 qui decode `dgmvar', gen(`dgmlabel`dgmvar'')
+			else qui gen `dgmlabel`dgmvar'' = `dgmvar'
+			tempvar dgmequals
+			qui gen `dgmequals' = "DGM: "
+			tempvar dgmtitle`dgmvar'
+			qui egen `dgmtitle`dgmvar'' = concat(`dgmequals' `dgmlabel`dgmvar'')
+			if "`by'"=="" local by = "`dgmtitle`dgmvar''"
+		} 
+		else {			
+			
+			tempvar dgmlabel`dgmvar'
+			qui gen `dgmlabel`dgmvar'' = `dgmvar'
+			
+			tempvar dgmequals
+			qui gen `dgmequals' = "`dgmvar': "
+			tempvar dgmtitle`dgmvar'
+			qui egen `dgmtitle`dgmvar'' = concat(`dgmequals' `dgmlabel`dgmvar'')
+			local by = "`dgmtitle`dgmvar''"
+		}
+			
+			qui tab `dgmvar'
+			local ndgmvar = `r(r)'
+			qui levelsof `dgmvar'
+			tokenize `r(levels)'
 
-	foreach el in `varlist' {
-		qui gen float mean`el' = .
-			forvalues d = 1/`ndgm' {
-				forval i = 1/`nummethod' {
-				qui summ `el' if `method'==`i' & `dgm'==`d', meanonly
-				qui replace mean`el' = r(mean) if `dgm'==`d' & newidrep== `ygraphvalue`i'' 
+				foreach el in `varlist' {
+					cap qui gen float mean`el'`dgmvar' = .
+						forvalues d = 1/`ndgmvar' {
+							forval i = 1/`nummethodnew' {
+							qui summ `el' if `method'==`i' & `dgmvar'==``d'', meanonly
+								if `numberdgms'!=1 qui replace mean`el'`dgmvar' = r(mean) if `dgmvar'==``d'' & newidrep`dgmvar'== `ygraphvalue`i'`dgmvar''
+								else qui replace mean`el'`dgmvar' = r(mean) if `dgmvar'==``d'' & newidrep`dgmvar'== `ygraphvalue`i''
+								}
+							}
+							
+				if "`meanoff'"=="" {
+					local graphname `graphname' `el'i`dgmvar'
+					local cmd twoway (scatter newidrep`dgmvar' `el', ///
+					msymbol(o) msize(small) mcolor(%30) mlc(white%1) mlwidth(vvvthin) `options')	///
+					(scatter newidrep`dgmvar' mean`el'`dgmvar', msym(|) msize(huge) mcol(orange) `meangraphoptions')	///
+					, ///
+					by(`by', title("") cols(1) note("") xrescale legend(off) `bygraphoptions')	///
+					ytitle("") ylabel(`labelvalues`dgmvar'', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
+					name(`el'i`dgmvar', replace) nodraw	
+				}
+				else {
+				local graphname `graphname' `el'i`dgmvar'
+					local cmd twoway (scatter newidrep`dgmvar' `el', ///
+					msymbol(o) msize(small) mcolor(%30) mlc(white%1) mlwidth(vvvthin) `options')	///
+					, ///
+					by(`by', title("") cols(1) note("") xrescale legend(off) `bygraphoptions')	///
+					ytitle("") ylabel(`labelvalues`dgmvar'', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
+					name(`el'i`dgmvar', replace) nodraw
 					}
 				}
 
-	if "`meanoff'"=="" {
-		local graphname `graphname' `el'i
-		local cmd twoway (scatter newidrep `el', ///
-		msymbol(o) msize(small) mcolor(%30) mlc(white%1) mlwidth(vvvthin) `options')	///
-		(scatter newidrep mean`el', msym(|) msize(huge) mcol(orange) `meangraphoptions')	///
-		, ///
-		by(`by', title("") cols(1) note("") xrescale legend(off) `bygraphoptions')	///
-		ytitle("") ylabel(`labelvalues', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
-		name(`el'i, replace) nodraw	
-	}
-	else {
-	local graphname `graphname' `el'i
-		local cmd twoway (scatter newidrep `el', ///
-		msymbol(o) msize(small) mcolor(%30) mlc(white%1) mlwidth(vvvthin) `options')	///
-		, ///
-		by(`by', title("") cols(1) note("") xrescale legend(off) `bygraphoptions')	///
-		ytitle("") ylabel(`labelvalues', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
-		name(`el'i, replace) nodraw
-		}
+				qui `cmd'
+				* global F9 `cmd'
+				
+				local name "name(simanswarm_`dgmvar', replace)"
+
+				if !mi(`"`combinegraphoptions'"') {
+					* Can't tokenize/substr as many "" in the string
+					tempvar _namestring
+					qui gen `_namestring' = `"`combinegraphoptions'"'
+					qui split `_namestring',  parse(`"name"')
+					local options = `_namestring'1
+					local namestring = `_namestring'2
+					local name = `"name`namestring'"' 
+				}
+		
+
+				graph combine `graphname', xsize(7) iscale(*1.5) `options' `name'
+				local graphname
+
 	}
 }
 * else create graphs without 'by' option as 'by' is for dgm only
 else {
 	foreach el in `varlist' {
 		qui gen float mean`el' = .
-				forval i = 1/`nummethod' {
+				forval i = 1/`nummethodnew' {
 				qui summ `el' if `method'==`i', meanonly
 				qui replace mean`el' = r(mean) if newidrep== `ygraphvalue`i''
 				}
 
 	if "`meanoff'"=="" {
 		local graphname `graphname' `el'i
-		local cmd twoway (scatter newidrep `el', ///
-		msymbol(o) msize(small) mcolor(%30) mlc(white%1) mlwidth(vvvthin) `options')	///
-		(scatter newidrep mean`el', msym(|) msize(huge) mcol(orange) `meangraphoptions')	///
+		local cmd twoway (scatter newidrep`dgmvar' `el', ///
+		msymbol(o) msize(small) mcolor(%30) mlc(white%1) mlwidth(vvvthin) legend(off) `options')	///
+		(scatter newidrep`dgmvar' mean`el', msym(|) msize(huge) mcol(orange) legend(off) `meangraphoptions')	///
 		, ///
-		ytitle("") ylabel(`labelvalues', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
+		ytitle("") ylabel(`labelvalues`dgmvar'', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
 		name(`el'i, replace) nodraw	
 	}
 	else {
 	local graphname `graphname' `el'i
-		local cmd twoway (scatter newidrep `el', ///
-		msymbol(o) msize(small) mcolor(%30) mlc(white%1) mlwidth(vvvthin) `options')	///
+		local cmd twoway (scatter newidrep`dgmvar' `el', ///
+		msymbol(o) msize(small) mcolor(%30) mlc(white%1) mlwidth(vvvthin) legend(off) `options')	///
 		, ///
-		ytitle("") ylabel(`labelvalues', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
+		ytitle("") ylabel(`labelvalues`dgmvar'', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
 		name(`el'i, replace) nodraw
 		}
 	}
+	
+	qui `cmd'
+
+	local name "name(simanswarm_`dgmvar', replace)"
+
+	if !mi(`"`combinegraphoptions'"') {
+		* Can't tokenize/substr as many "" in the string
+		tempvar _namestring
+		qui gen `_namestring' = `"`combinegraphoptions'"'
+		qui split `_namestring',  parse(`"name"')
+		local options = `_namestring'1
+		local namestring = `_namestring'2
+		local name `"name`namestring'"'
+	}
+
+	graph combine `graphname', xsize(7) iscale(*1.5) `options' `name'
+	local graphname	
 }
 
 qui `cmd'
 * global F9 `cmd'
 
-local name = "name(simanswarm, replace)"
-
-if !mi(`"`maingraphoptions'"') {
-	* Can't tokenize/substr as many "" in the string
-	tempvar _namestring
-	qui gen `_namestring' = `"`maingraphoptions'"'
-	qui split `_namestring',  parse(`"name"')
-	local options = `_namestring'1
-	local namestring = `_namestring'2
-	local name = `"name`namestring'"'
-}
-
-graph combine `graphname', xsize(7) iscale(*1.5) `combinegraphoptions'
-
 restore
+
+use `origdata', clear
 
 end
 

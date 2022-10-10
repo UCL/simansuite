@@ -94,6 +94,8 @@ siman_blandaltman
 siman_blandaltman, ytitle("test y-title") xtitle("test x-title") name("yabberdabberdoo") 
 siman_blandaltman, ytitle("test y-title") xtitle("test x-title")
 
+clear all
+prog drop _all
 cd N:\My_files\siman\Ian_example\
 use bvsim_all_out.dta, clear
 rename _dnum dnum
@@ -118,7 +120,7 @@ siman_comparemethodsscatter, methlist(3 8)
 siman_comparemethodsscatter, methlist(1 3 8)                      
 siman_comparemethodsscatter se, methlist(1 3 8 9) 
 siman_comparemethodsscatter, by(target)  
-siman_comparemethodsscatter, methlist(1 3 8) by(target) 
+siman_comparemethodsscatter, methlist(1 3 8) by(target)                      
 siman_comparemethodsscatter se, methlist(1 3 8 9) by(target) 
 
 * String variable method
@@ -157,7 +159,7 @@ siman_setup, rep(dnum) dgm(dgm) est(est) se(se) method(method) target(target)
 siman_comparemethodsscatter
 siman_comparemethodsscatter, methlist(A C)                       
 siman_comparemethodsscatter, methlist(B C D) 
-siman_comparemethodsscatter, methlist(B C D)  by(target) 
+siman_comparemethodsscatter, methlist(B C D)  by(target)                       
 siman_blandaltman	
 siman_blandaltman, methlist(A C)  
 
@@ -727,15 +729,56 @@ drop theta
 rename theta_new theta
 keep v1 theta rho pc k exppeto expg2 var2peto var2g2 explimf var2limf
 siman_setup, rep(v1) dgm(theta rho pc k) method(peto g2 limf) estimate(exp) se(var2) true(theta)
+siman blandaltman
 siman blandaltman, by(theta)              
 siman blandaltman, by(k)
 siman reshape, longlong
 siman blandaltman if method == "peto" | method == "limf"  
 siman blandaltman if (method == "peto" | method == "limf"), by(k) 
-siman blandaltman if (method == "peto" | method == "limf"), by(theta) name("simanswarm_new", replace)                  
+siman blandaltman if (method == "peto" | method == "limf"), by(theta) name("simanba_new", replace)                  
 
+* Testing siman comparemethodsscatter
+**************************************
+clear all
+prog drop _all
+cd N:\My_files\siman\GertaRucker\12874_2014_1136_MOESM1_ESM\
+use res.dta, clear
+keep v1 theta rho pc k exppeto expg2 var2peto var2g2
+* theta needs to be in integer format for levelsof command to work (doesn't accept non-integer values), so make integer values with non-integer labels
+gen theta_new=2
+replace theta_new=1 if theta == 0.5
+replace theta_new=3 if theta == 0.75
+replace theta_new=4 if theta == 1 
+label define theta_new 1 "0.5" 2 "0.67" 3 "0.75" 4 "1"
+label values theta_new theta_new
+label var theta_new "theta categories"
+*br theta theta_new
+drop theta
+rename theta_new theta
+siman_setup, rep(v1) dgm(theta rho pc k) method(peto g2) estimate(exp) se(var2) true(theta)
+siman comparemethodsscatter
 
+clear all
+prog drop _all
+cd N:\My_files\siman\GertaRucker\12874_2014_1136_MOESM1_ESM\
+use res.dta, clear
+gen theta_new=2
+replace theta_new=1 if theta == 0.5
+replace theta_new=3 if theta == 0.75
+replace theta_new=4 if theta == 1 
+label define theta_new 1 "0.5" 2 "0.67" 3 "0.75" 4 "1"
+label values theta_new theta_new
+label var theta_new "theta categories"
+drop theta
+rename theta_new theta
+keep v1 theta rho pc k exppeto expg2 var2peto var2g2 explimf var2limf
+siman_setup, rep(v1) dgm(theta rho pc k) method(peto g2 limf) estimate(exp) se(var2) true(theta)
+siman comparemethodsscatter
+siman reshape, longlong 
 
+siman comparemethodsscatter, methlist("peto" "limf") 
+siman comparemethodsscatter, methlist("peto" "limf") name("simancms_new", replace) 
+siman comparemethodsscatter if theta == 1                                       *** gives theta = 1 only, but then all other dgms too.  Need to put code in to brake down `if' statement if by a dgm ************
 
 /*
 siman reshape, longlong

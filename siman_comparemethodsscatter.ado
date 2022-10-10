@@ -1,4 +1,5 @@
-*! version 1.7   05sep2022
+*! version 1.8   10oct2022 
+*  version 1.8   10oct2022    EMZ added to code so now allows graphs split out by every dgm variable and level if multiple dgm variables declared.
 *  version 1.7   05sep2022    EMZ added additional error message
 *  version 1.6   01sep2022    EMZ fixed bug to allow scheme to be specified
 *  version 1.5   14july2022   EMZ fixed bug to allow name() in call
@@ -7,7 +8,6 @@
 *  version 1.2   24mar2022    EMZ changes from IW testing
 *  version 1.1   06dec2021    EMZ changes (bug fix)
 *  version 1.0   25Nov2019    Ella Marley-Zagar, MRC Clinical Trials Unit at UCL. Based on Tim Morris' simulation tutorial do file.
-* Last updated 13/07/2021
 * File to produce the siman comparemethods scatter plot
 * The graphs are automatically split out by dgm (one graph per dgm) and will compare the methods to each other.  Therefore the only option to split the 
 * graphs with the `by' option is by target, so the by(varlist) option will only allow by(target).
@@ -45,6 +45,9 @@ if `nummethod' < 2 {
 	di as error "There are not enough methods to compare, siman comparemethods scatter requires at least 2 methods."
 	exit 498
 	}
+	
+tempfile origdata
+qui save `origdata'
 	
 * If data is not in long-long format, then reshape to get method labels
 if `nformat'!=1 {
@@ -89,6 +92,7 @@ qui generate `tousein' = 0
 qui replace `tousein' = 1 `inscatterc' 
 qui keep if `tousein'
 
+
 * Obtain dgm values
 cap confirm variable `dgm'
 	if !_rc {
@@ -111,6 +115,28 @@ cap confirm variable `dgm'
 }
 	}
 
+preserve
+* keeps estimates data only
+qui drop if `rep'<0
+
+
+* only analyse the methods that the user has requested
+if !mi("`methlist'") {
+*	numlist "`methlist'"
+	local methodvalues = "`methlist'"
+	local methodcount: word count `methlist'
+*	local nummethod = `count'
+	tempvar tousemethod
+	qui generate `tousemethod' = 0
+    tokenize `methlist'
+		foreach j in `methodvalues' {
+			if `methodstringindi' == 0 qui replace `tousemethod' = 1  if `method' == `j'
+			else if `methodstringindi' == 1 qui replace `tousemethod' = 1  if `method' == "`j'"
+		}
+qui keep if `tousemethod' == 1	
+qui drop `tousemethod'	
+}
+
 * Need labelsof package installed to extract method labels
 qui capture which labelsof
 if _rc {
@@ -127,6 +153,7 @@ if `"`r(labels)'"'!="" {
 
 	forvalues i = 1/`nummethod' {  
 		gettoken mlabel`i' 0 : 0, parse(": ")
+		local methodvalues `methodvalues' `mlabel`i''
 	}
 }
 else {
@@ -138,43 +165,19 @@ if `methodstringindi'==0 numlist "`levels'"
 	
 		forvalues i = 1/`nummethod' {  
 			local mlabel`i' Method_`i'
+			local methodlabel`i' `i'
+			local methodvalues `methodvalues' `methodlabel`i''
 		}
 	}
 	else if `methodstringindi'==1 {
 	
 		forvalues i = 1/`nummethod' {  
 			local mlabel`i' Method_``i''
+			local methodlabel`i' ``i''
+			local methodvalues `methodvalues' `methodlabel`i''
 		}
 		
 	}
-}
-
-
-/*
-di `"`mlabel1'"'
-di `"`mlabel2'"'
-di `"`mlabel3'"'
-*/
-
-preserve
-* keeps estimates data only
-qui drop if `rep'<0
-
-* only analyse the methods that the user has requested
-if !mi("`methlist'") {
-*	numlist "`methlist'"
-	local methodvalues = "`methlist'"
-	local count: word count `methlist'
-*	local nummethod = `count'
-	tempvar tousemethod
-	qui generate `tousemethod' = 0
-    tokenize `methlist'
-		foreach j in `methodvalues' {
-			if `methodstringindi' == 0 qui replace `tousemethod' = 1  if `method' == `j'
-			else if `methodstringindi' == 1 qui replace `tousemethod' = 1  if `method' == "`j'"
-		}
-qui keep if `tousemethod' == 1
-qui drop `tousemethod'		
 }
 
 
@@ -208,18 +211,15 @@ else local nodraw "nodraw"
 	
 di as text "working......."
 
-* Comparing each method vs. each other method
+if !mi("`methlist'") {
+	local numbermethod = `methodcount'
+	local methodvalues `methlist'
+}
+else local numbermethod = `nummethod'
 
-if mi("`methlist'") local methodvalues = `"`levels'"'
-if !mi("`methlist'") local nummethod = `count'
-
-*di `"`methodvalues'"'
-*di `"`levels'"'
-if !mi("`methlist'") tokenize `methlist'
-
-local counter = 1
-if mi("`methlist'") | (!mi("`methlist'") & `methodstringindi'==1) local ifcommand = "forvalues j = 1/`nummethod'"
+if mi("`methlist'") | (!mi("`methlist'") & `methodstringindi'==1) local ifcommand = "forvalues j = 1/`numbermethod'"
 else local ifcommand = "foreach j in `methodvalues'"
+
 
 if "`by'"=="" local by ""
 else if "`by'"=="`target'" local by by(`target', note("") legend(off))
@@ -228,48 +228,46 @@ else if !mi("`by'") & "`by'"!="`target'" {
 	exit 498
     }
 
+local c = 1
  `ifcommand' {    
-*	forvalues j = 1/`nummethod' {                                
+                               
 	if `methodstringindi'==0 {
 		
-*		foreach j in `methodvalues' {
 		label var `estimate'`j' "`estimate', `mlabel`j''"
 		label var `se'`j' "`se', `mlabel`j''"
-*		}
+		local mlabel`c' Method_`j'
+
 	}
 	else if `methodstringindi'==1 {
 		label var `estimate'``j'' "`estimate', Method_``j''"
 		label var `se'``j'' "`se', Method_``j''"
-		local mlabel`counter' Method_``j''
+		local mlabel`c' Method_``j''
 		}
-	
-		* plot markers
-		if `j'==1 {
-			local pt1 = 0.7
-			local pt2 = 0
-			}
-		else if `j'==2 {
-			local pt1 = 0.5
-			local pt2 = -0.5
-			}
-		else if `j'>2 {
-			local pt1 = 0
-			local pt2 = -0.5
-			}
-	twoway scatteri 0 0 (0) "`mlabel`j''" .5 `pt1' (0) "`estimate' " -.5 `pt2' (0) "`se'", yscale(range(-1 1)) xscale(range(-1 1)) msym(i) mlabs(vlarge) xlab(none) ylab(none) xtit("") ytit("") legend(off) `nodraw' mlab(black) `subgraphoptions' name(`mlabel`counter'', replace) 
-	local counter = `counter' + 1
+		
+			* plot markers
+			if `j'==1 {
+				local pt1 = 0.7
+				local pt2 = 0
+				}
+			else if `j'==2 {
+				local pt1 = 0.5
+				local pt2 = -0.5
+				}
+			else if `j'>2 {
+				local pt1 = 0
+				local pt2 = -0.5
+				}		
+
+	twoway scatteri 0 0 (0) "`mlabel`j''" .5 `pt1' (0) "`estimate' " -.5 `pt2' (0) "`se'", yscale(range(-1 1)) xscale(range(-1 1)) msym(i) mlabs(vlarge) xlab(none) ylab(none) xtit("") ytit("") legend(off) `nodraw' mlab(black) `subgraphoptions' name(`mlabel`j'', replace) 
+	local c = `c' + 1
 	}
 
-* create ranges for theta and se graphs (min and max)
 
-*if `methodstringindi'==0 tokenize `methodvalues'
-*else if `methodstringindi'==1 tokenize `method'
-*di `"`1'"'
-*di `"`2'"'
-*foreach m in `methodvalues' {
-forvalues m = 1/`nummethod' {
-*    if `methodstringindi'==0 {
-		qui summarize `estimate'``m''
+* create ranges for theta and se graphs (min and max)
+qui tokenize `methodvalues'
+	forvalues m = 1/`numbermethod' {
+
+	    qui summarize `estimate'``m''
 		local minest`m' = `r(min)'
 		local maxest`m' = `r(max)'
 		
@@ -288,7 +286,6 @@ forvalues m = 1/`nummethod' {
 					if `maxse`n'' > `maxse`m'' local maxse = `maxse`n''
 					else local maxse = `maxse`m''
 			}
-
 }
 
 * If have number of methods > 3 then need list of estimate and se variables in long-wide format e.g. est1 est2 est3 etc for graph matrix command
@@ -328,85 +325,223 @@ if !mi(`"`options'"') {
 
 * For the purposes of the graphs below, if dgm is missing in the dataset then set
 * the number of dgms to be 1.
-if "`dgm'"=="" local dgmvalues=1  
-                                             
-foreach m in `dgmvalues' {
-	local frtheta `minest' `maxest'
-	local frse `minse' `maxse'
+if "`dgm'"=="" local dgmvalues=1 
+
+
+/*                                             
+if `numberdgms'==1 local for "foreach m in `dgmvalues'"
+else if `numberdgms'!=1 {
+		qui tab `dgmvar'
+		local numlevelsdgmvar = `r(r)'	
+		labelsof `dgmvar'
+        local for "forvalues m=1/`numlevelsdgmvar'"
+		local dgm `dgmvar'
+}
 	
-		if `methodstringindi'==0  | !mi("`methlist'") {
-*			numlist "`methodvalues'", sort
-			local maxmethodvalues : word `nummethod' of `r(numlist)'
-		local maxmethodvaluesplus1 = substr("`methodvalues'", -`nummethod', .)
-		*di "`maxmethodvaluesplus1'"
-		local maxmethodvaluesminus1 = substr("`methodvalues'", 1 ,`nummethod')
-		*di "`maxmethodvaluesminus1'"
-		local counter = 1
-		local counterplus1 = 2
-		foreach j in `maxmethodvaluesminus1' {
-			*di "`j'"
+local `for' {
+*/
 
-				foreach k in `maxmethodvaluesplus1' {
-				 if "`j'" != "`k'" {
-					  twoway (function x, range(`frtheta') lcolor(gs10)) (scatter `estimate'`j' `estimate'`k' if `dgm'==`m', ms(o) ///
-					  mlc(white%1) msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), `nodraw' `by' name(`estimate'`j'`k'dgm`m', replace) 
-					  twoway (function x, range(`frse') lcolor(gs10)) (scatter `se'`j' `se'`k' if `dgm'==`m', ms(o) mlc(white%1) ///
-					  msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), `nodraw' `by' name(`se'`j'`k'dgm`m', replace) 
-					  local graphtheta`counter'`counterplus1'`m' `estimate'`j'`k'dgm`m'
-					  local graphse`counter'`counterplus1'`m' `se'`j'`k'dgm`m'
-                      local counterplus1 = `counterplus1' + 1
-					  if `counterplus1' > `nummethod' local counterplus1 = `nummethod'
-				  }
-				}
-				local counter = `counter' + 1
-		}
-	}
-                
-				  else if `methodstringindi'==1 {
-						local counter = 1
-						local counterplus1 = 2
-						local maxmethodvaluesminus1 = `nummethod' - 1
-*						local maxmethodvaluesplus1 = `nummethod' + 1
-				  		forvalues j = 1/`maxmethodvaluesminus1' {
-							forvalues k = 2/`nummethod' {
-								if "`j'" != "`k'" {
-					  twoway (function x, range(`frtheta') lcolor(gs10)) (scatter `estimate'``j'' `estimate'``k'' if `dgm'==`m', ms(o) ///
-					  mlc(white%1) msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), `by' name(`estimate'``j''``k''dgm`m', replace)
-					  twoway (function x, range(`frse') lcolor(gs10)) (scatter `se'``j'' `se'``k'' if `dgm'==`m', ms(o) ///
-					  mlc(white%1) msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), `by' name(`se'``j''``k''dgm`m', replace)
-					  local graphtheta`counter'`counterplus1'`m' `estimate'``j''``k''dgm`m'
-					  local graphse`counter'`counterplus1'`m' `se'``j''``k''dgm`m'
-					local counterplus1 = `counterplus1' + 1
-					if `counterplus1' > `nummethod' local counterplus1 = `nummethod'
-							}
-							}
+if `numberdgms'==1 {
+	foreach m in `dgmvalues' {
+		local frtheta `minest' `maxest'
+		local frse `minse' `maxse'
+		
+			if `methodstringindi'==0  {
+				local maxmethodvalues : word `numbermethod' of `methodvalues'
+				local maxmethodvaluesplus1 = substr("`methodvalues'", -`numbermethod', .)
+				*di "`maxmethodvaluesplus1'"
+				local maxmethodvaluesminus1 = substr("`methodvalues'", 1 ,`numbermethod')
+				*di "`maxmethodvaluesminus1'"
+				local counter = 1
+				local counterplus1 = 2
+				foreach j in `maxmethodvaluesminus1' {
+				*di "`j'"
+
+					foreach k in `maxmethodvaluesplus1' {
+					 if "`j'" != "`k'" {
+						  twoway (function x, range(`frtheta') lcolor(gs10)) (scatter `estimate'`j' `estimate'`k' if `dgm'==`m', ms(o) ///
+						  mlc(white%1) msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), `nodraw' `by' name(`estimate'`j'`k'dgm`m', replace) 
+						  twoway (function x, range(`frse') lcolor(gs10)) (scatter `se'`j' `se'`k' if `dgm'==`m', ms(o) mlc(white%1) ///
+						  msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), `nodraw' `by' name(`se'`j'`k'dgm`m', replace) 
+						  local graphtheta`counter'`counterplus1'`m' `estimate'`j'`k'dgm`m'
+						  local graphse`counter'`counterplus1'`m' `se'`j'`k'dgm`m'
+						  local counterplus1 = `counterplus1' + 1
+						  if `counterplus1' > `numbermethod' local counterplus1 = `numbermethod'
+					  }
+					}
 					local counter = `counter' + 1
-				  }
-}
-
-		if `nummethod'==2 {
-			graph combine `mlabel1' `graphtheta12`m'' ///
-			`graphse12`m'' `mlabel2' ///
-			, title("siman compare methods scatter") cols(2)	///
-			xsize(4)	///
-			name(`name'_dgm`m', replace) `options'
 			}
-		else if `nummethod'==3 {
-			graph combine `mlabel1' `graphtheta12`m'' `graphtheta13`m''	///
-			`graphse12`m'' `mlabel2' `graphtheta23`m''	///
-			`graphse13`m'' `graphse23`m'' `mlabel3'	///
-			, title("siman compare methods scatter") cols(3)	///
-			xsize(4)	///
-			name(`name'_dgm`m', replace) `options'
-			}
-		else if `nummethod'>3 {
-		    if mi("`anything'") local anything = "est"
-			graph matrix `varlist' if `dgm'==`m', `half' `by' title("siman compare methods scatter") name(`name'_`anything'`j'`k'dgm`m', replace) `options'
 		}
+					
+					  else if `methodstringindi'==1 | !mi("`methlist'") {
+							local counter = 1
+							local counterplus1 = 2
+							local maxmethodvaluesminus1 = `numbermethod' - 1
+	*						local maxmethodvaluesplus1 = `numbermethod' + 1
+							forvalues j = 1/`maxmethodvaluesminus1' {
+								forvalues k = 2/`numbermethod' {
+									if "`j'" != "`k'" {
+										
+						  twoway (function x, range(`frtheta') lcolor(gs10)) (scatter `estimate'``j'' `estimate'``k'' if `dgm'==`m', ms(o) ///
+						  mlc(white%1) msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), `by' name(`estimate'``j''``k''dgm`m', replace)
+						  twoway (function x, range(`frse') lcolor(gs10)) (scatter `se'``j'' `se'``k'' if `dgm'==`m', ms(o) ///
+						  mlc(white%1) msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), `by' name(`se'``j''``k''dgm`m', replace)
+						  local graphtheta`counter'`counterplus1'`m' `estimate'``j''``k''dgm`m'
+						  local graphse`counter'`counterplus1'`m' `se'``j''``k''dgm`m'
+						  local counterplus1 = `counterplus1' + 1
+						  if `counterplus1' > `numbermethod' local counterplus1 = `numbermethod'
+									}
+								}
+						local counter = `counter' + 1
+					  }
+					}
+
+			if `numbermethod'==2 {
+				graph combine `mlabel1' `graphtheta12`m'' ///
+				`graphse12`m'' `mlabel2' ///
+				, title("siman compare methods scatter") cols(2)	///
+				xsize(4)	///
+				name(`name'_dgm`m', replace) `options'
+				}
+			else if `numbermethod'==3 {
+				graph combine `mlabel1' `graphtheta12`m'' `graphtheta13`m''	///
+				`graphse12`m'' `mlabel2' `graphtheta23`m''	///
+				`graphse13`m'' `graphse23`m'' `mlabel3'	///
+				, title("siman compare methods scatter") cols(3)	///
+				xsize(4)	///
+				name(`name'_dgm`m', replace) `options'
+				}
+			else if `numbermethod'>3 {
+				if mi("`anything'") local anything = "est"
+				graph matrix `varlist' if `dgm'==`m', `half' `by' title("siman compare methods scatter") ///
+				name(`name'_`anything'`j'`k'dgm`m', replace) `options'
+			}
+	}
 }
 
+else if `numberdgms'!=1 {
+	
+			foreach dgmvar in `dgmvalues' {
+								
+				local dgmlabels = 0
+				
+				qui tab `dgmvar'
+				local ndgmvar = `r(r)'
+				* Get dgm label values
+				cap qui labelsof `dgmvar'
+				cap qui ret list
+				
+				if `"`r(labels)'"'!="" {
+					local 0 = `"`r(labels)'"'
+
+					forvalues i = 1/`ndgmvar' {  
+					gettoken `dgmvar'dlabel`i' 0 : 0, parse(": ")
+					local dgmlabels = 1
+					}
+				}
+				else {
+					
+				local dgmlabels = 0
+				qui levels `dgmvar', local(levels)
+				
+				local loop = 1
+				foreach l of local levels {
+					local `dgmvar'dlabel`loop' `l'
+					local loop = `loop' + 1
+				}
+
+		}
+	
+				forvalues d = 1/`ndgmvar' {
+			
+					
+				if `dgmlabels' == 0 local dgmfilter = "`dgmvar' == ``dgmvar'dlabel`d''"
+				else if `dgmlabels' == 1 local dgmfilter = "`dgmvar'==`d'"
+				
+				local frtheta `minest' `maxest'
+				local frse `minse' `maxse'
+				
+					if `methodstringindi'==0   {		
+					
+					* numlist "`methodvalues'", sort
+					local maxmethodvalues : word `numbermethod' of `r(numlist)'
+					local maxmethodvaluesplus1 = substr("`methodvalues'", -`nummethod', .)
+					*di "`maxmethodvaluesplus1'"
+					local maxmethodvaluesminus1 = substr("`methodvalues'", 1 ,`numbermethod')
+					*di "`maxmethodvaluesminus1'"
+					local counter = 1
+					local counterplus1 = 2
+						foreach j in `maxmethodvaluesminus1' {
+						*di "`j'"
+
+							foreach k in `maxmethodvaluesplus1' {
+							 if "`j'" != "`k'" {
+								  twoway (function x, range(`frtheta') lcolor(gs10)) (scatter `estimate'`j' `estimate'`k' if /// 
+								  `dgmfilter', ms(o) mlc(white%1) msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), /// 
+								  `nodraw' `by' name(`estimate'`j'`k'`dgmvar'`d', replace) 
+								  twoway (function x, range(`frse') lcolor(gs10)) (scatter `se'`j' `se'`k' if ///
+								  `dgmfilter', ms(o) mlc(white%1) msize(tiny) xtit("") ytit("") legend(off) `subgraphoptions'), ///
+								  `nodraw' `by' name(`se'`j'`k'`dgmvar'`d', replace) 
+								  local graphtheta`counter'`counterplus1'`dgmvar'`d' `estimate'`j'`k'`dgmvar'`d'
+								  local graphse`counter'`counterplus1'`dgmvar'`d'  `se'`j'`k'`dgmvar'`d'
+								  local counterplus1 = `counterplus1' + 1
+								  if `counterplus1' > `numbermethod' local counterplus1 = `numbermethod'
+							  }
+							}
+							local counter = `counter' + 1
+					}
+				}
+							
+							  else if `methodstringindi'==1 | !mi("`methlist'") {
+									local counter = 1
+									local counterplus1 = 2
+									local maxmethodvaluesminus1 = `numbermethod' - 1
+			*						local maxmethodvaluesplus1 = `nummethod' + 1
+									forvalues j = 1/`maxmethodvaluesminus1' {
+										forvalues k = 2/`numbermethod' {											
+											if "`j'" != "`k'" {				
+												twoway (function x, range(`frtheta') lcolor(gs10)) (scatter `estimate'``j'' `estimate'``k'' ///
+												if `dgmfilter', ms(o) mlc(white%1) msize(tiny) xtit("") ytit("") legend(off) /// 
+												`subgraphoptions'), `by' name(`estimate'``j''``k''`dgmvar'`d', replace)
+												twoway (function x, range(`frse') lcolor(gs10)) (scatter `se'``j'' `se'``k'' if /// 
+												`dgmfilter', ms(o) mlc(white%1) msize(tiny) xtit("") ytit("") legend(off) /// 
+												`subgraphoptions'), `by' name(`se'``j''``k''`dgmvar'`d', replace)
+												local graphtheta`counter'`counterplus1'`dgmvar'`d' `estimate'``j''``k''`dgmvar'`d'
+												local graphse`counter'`counterplus1'`dgmvar'`d' `se'``j''``k''`dgmvar'`d'
+												local counterplus1 = `counterplus1' + 1		
+												if `counterplus1' > `numbermethod' local counterplus1 = `numbermethod'
+											}
+										}
+								local counter = `counter' + 1
+							  }
+							}
+
+					if `numbermethod'==2 {
+						graph combine `mlabel1' `graphtheta12`dgmvar'`d'' ///
+						`graphse12`dgmvar'`d'' `mlabel2' ///
+						, title("siman compare methods scatter") cols(2)	///
+						xsize(4)	///
+						name(`name'_`dgmvar'`d', replace) `options'
+						}
+					else if `numbermethod'==3 {
+						graph combine `mlabel1' `graphtheta12`dgmvar'`d'' `graphtheta13`dgmvar'`d''	///
+						`graphse12`dgmvar'`d'' `mlabel2' `graphtheta23`dgmvar'`d''	///
+						`graphse13`dgmvar'`d'' `graphse23`dgmvar'`d'' `mlabel3'	///
+						, title("siman compare methods scatter") cols(3)	///
+						xsize(4)	///
+						name(`name'_`dgmvar'`d', replace) `options'
+						}
+					else if `numbermethod'>3 {
+						if mi("`anything'") local anything = "est"
+						graph matrix `varlist' if `dgmvar'==`d', `half' `by' title("siman compare methods scatter") name(`name'_`anything'`j'`k'`dgmvar'`d', replace) `options'
+					}
+			}
+     }
+}
 
 restore
+
+use `origdata', clear 
 
 end
 

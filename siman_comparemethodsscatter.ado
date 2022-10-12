@@ -70,6 +70,28 @@ if mi("`methlist'") & `nummethod' > 5 {
 * if the user has not specified 'if' in the siman comparemethods scatter syntax, but there is one from siman setup then use that 'if'
 if ("`if'"=="" & "`ifsetup'"!="") local ifscatterc = `"`ifsetup'"'
 else local ifscatterc = `"`if'"'
+* handle if dgm defined by multiple variables, and user specifies 'if dgm1 == x'
+local ifdgm = 0
+if !mi("`ifscatterc'") {
+	cap confirm variable `dgm'
+		if !_rc {
+			local numberdgms: word count `dgm'
+			if `numberdgms'!=1 {
+					gettoken dgmfilter ifscatterc: ifscatterc, parse("==")
+					local ifremove "if "
+					local dgmleft: list dgmfilter - ifremove
+					local dgmorig = "`dgm'"
+					local dgmtodrop: list dgm - dgmleft
+					local ifdgm = 1
+					* for value of dgm being filtered on
+					gettoken dgmleft2 ifscatterc: ifscatterc, parse("==")
+					local dgmfiltervalues = `ifscatterc'
+					* to restore `if'
+					local ifscatterc = `"`if'"'
+			}
+		}
+}
+
 tempvar touseif
 qui generate `touseif' = 0
 qui replace `touseif' = 1 `ifscatterc' 
@@ -210,6 +232,13 @@ else local nodraw "nodraw"
 
 	
 di as text "working......."
+
+if `ifdgm' == 1 {
+	qui drop `dgmtodrop'
+	local dgm = "`dgmleft'"
+	local dgmvalues = `dgmfiltervalues'
+	local numberdgms = 1
+}
 
 if !mi("`methlist'") {
 	local numbermethod = `methodcount'
@@ -540,6 +569,8 @@ else if `numberdgms'!=1 {
 }
 
 restore
+
+local dgm = "`dgmorig'"
 
 use `origdata', clear 
 

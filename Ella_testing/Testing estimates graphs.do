@@ -778,7 +778,9 @@ siman reshape, longlong
 
 siman comparemethodsscatter, methlist("peto" "limf") 
 siman comparemethodsscatter, methlist("peto" "limf") name("simancms_new", replace) 
-siman comparemethodsscatter if theta == 1                                       *** gives theta = 1 only, but then all other dgms too.  Need to put code in to brake down `if' statement if by a dgm ************
+siman comparemethodsscatter if theta == 1  
+siman comparemethodsscatter if theta == 4 
+siman comparemethodsscatter if pc == 2, name("simancmspc", replace)                                   
 
 /*
 siman reshape, longlong

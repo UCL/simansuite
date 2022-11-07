@@ -782,6 +782,34 @@ siman comparemethodsscatter if theta == 1
 siman comparemethodsscatter if theta == 4 
 siman comparemethodsscatter if pc == 2, name("simancmspc", replace)                                   
 
+
+* Testing siman zipplot
+************************
+clear all
+prog drop _all
+cd N:\My_files\siman\GertaRucker\12874_2014_1136_MOESM1_ESM\
+use res.dta, clear
+keep v1 theta rho pc k exppeto expg2 var2peto var2g2
+* theta needs to be in integer format for levelsof command to work (doesn't accept non-integer values), so make integer values with non-integer labels
+gen theta_new=2
+replace theta_new=1 if theta == 0.5
+replace theta_new=3 if theta == 0.75
+replace theta_new=4 if theta == 1 
+label define theta_new 1 "0.5" 2 "0.67" 3 "0.75" 4 "1"
+label values theta_new theta_new
+label var theta_new "theta categories"
+*br theta theta_new
+drop theta
+rename theta_new theta
+siman_setup, rep(v1) dgm(theta rho pc k) method(peto g2 limf) estimate(exp) se(var2) true(theta)
+siman_zipplot  
+siman zipplot, by(k)       
+siman reshape, longlong 
+siman zipplot if (method == "peto" | method == "limf"), name("simanzip_new", replace) 
+siman zipplot, by(method k)
+siman zipplot if (method == "peto" | method == "limf"), by(method k) 
+siman zipplot if theta == 1  
+
 /*
 siman reshape, longlong
 bysort theta method: gen sortvar = _n

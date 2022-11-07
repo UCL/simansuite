@@ -1,4 +1,5 @@
-*! version 1.6   26sep2022
+*! version 1.7   07nov2022
+*  version 1.7   07nov2022    EMZ small bug fix
 *  version 1.6   26sep2022    EMZ added to code so now allows scatter graphs split out by every dgm variable and level if multiple dgm variables declared.
 *  version 1.5   05sep2022    EMZ added additional error message.
 *  version 1.4   14july2022   EMZ. Corrected bug where mean bars were displaced downwards. Changed graph title so uses dgm label (not value) if exists.
@@ -53,7 +54,8 @@ else foreach thing of local anything {
 	local varelement = "`thing'"
 	local varlist `varlist' `varelement'
 	}
-
+set trace on
+set tracedepth 1
 
 * if the user has not specified 'if' in the siman swarm syntax, but there is one from siman setup then use that 'if'
 if ("`if'"=="" & "`ifsetup'"!="") local ifswarm = `"`ifsetup'"'
@@ -104,7 +106,6 @@ if `nummethodnew' < 2 {
 local methodstringindi = 0
 capture confirm string variable `method'
 if !_rc local methodstringindi = 1
-
 
 * Need labelsof package installed to extract method labels
 qui capture which labelsof
@@ -320,6 +321,8 @@ if `ndgm' != 1 {
 				local graphname
 
 	}
+	
+	local name "name(simanswarm_`dgmvar', replace)"
 }
 * else create graphs without 'by' option as 'by' is for dgm only
 else {
@@ -332,26 +335,27 @@ else {
 
 	if "`meanoff'"=="" {
 		local graphname `graphname' `el'i
-		local cmd twoway (scatter newidrep`dgmvar' `el', ///
+		local cmd twoway (scatter newidrep `el', ///
 		msymbol(o) msize(small) mcolor(%30) mlc(white%1) mlwidth(vvvthin) legend(off) `options')	///
-		(scatter newidrep`dgmvar' mean`el', msym(|) msize(huge) mcol(orange) legend(off) `meangraphoptions')	///
+		(scatter newidrep mean`el', msym(|) msize(huge) mcol(orange) legend(off) `meangraphoptions')	///
 		, ///
-		ytitle("") ylabel(`labelvalues`dgmvar'', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
+		ytitle("") ylabel(`labelvalues', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
 		name(`el'i, replace) nodraw	
 	}
 	else {
 	local graphname `graphname' `el'i
-		local cmd twoway (scatter newidrep`dgmvar' `el', ///
+		local cmd twoway (scatter newidrep `el', ///
 		msymbol(o) msize(small) mcolor(%30) mlc(white%1) mlwidth(vvvthin) legend(off) `options')	///
 		, ///
-		ytitle("") ylabel(`labelvalues`dgmvar'', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
+		ytitle("") ylabel(`labelvalues', nogrid labsize(medium) angle(horizontal)) `graphoptions'	///
 		name(`el'i, replace) nodraw
 		}
+	local name "name(simanswarm, replace)"
 	}
 	
 	qui `cmd'
 
-	local name "name(simanswarm_`dgmvar', replace)"
+	
 
 	if !mi(`"`combinegraphoptions'"') {
 		* Can't tokenize/substr as many "" in the string

@@ -197,6 +197,7 @@ replace dgm=2 if dupindicator==1
 drop dupindicator
 tempfile origdata
 save `origdata', replace
+
 * 2 methods, true variable
 drop if method>2
 gen true = 0.5
@@ -210,6 +211,7 @@ siman zipplot
 siman swarm
 * 3 methods, true variable
 use `origdata', clear
+
 drop if method>3
 gen true = 0.5
 siman_setup, rep(dnum) dgm(dgm) est(est) se(se) method(method) target(target) true(true)
@@ -232,15 +234,18 @@ siman blandaltman
 siman blandaltman est se
 siman zipplot
 siman swarm
+
 * 2 methods, true value
 use `origdata', clear
 drop if method>2
 siman_setup, rep(dnum) dgm(dgm) est(est) se(se) method(method) target(target) true(0.5)
+
 siman scatter
 siman scatter se est
 siman comparemethodsscatter
 siman blandaltman
 siman blandaltman est se
+
 siman zipplot
 siman swarm
 * 3 methods, true value

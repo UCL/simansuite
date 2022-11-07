@@ -96,6 +96,7 @@ qui drop if `rep'<0
 if  substr("`estimate'",strlen("`estimate'"),1)=="_" local estimate = substr("`estimate'", 1, index("`estimate'","_") - 1)
 if  substr("`se'",strlen("`se'"),1)=="_" local se = substr("`se'", 1, index("`se'","_") - 1)
 
+
 * Zip plot of confidence intervals
 
 capture confirm variable `lci'
@@ -108,7 +109,6 @@ if _rc {
 		qui gen float uci = `estimate' + (`se'*invnorm(.975))
 		local uci uci
 	}
-	
 
 if "`method'"!="" {
 
@@ -148,7 +148,7 @@ if _rc {
 				local truevalue = `r(levels)'
 				local `true'value1 = `r(levels)'
 				local `true'label1 = `r(levels)'
-				local `true'number`truevalue' `truevalue'
+				*local `true'number`truevalue' `truevalue'
 				replace `true'calc = `truevalue'
 			}
 			else if `r(r)'>1 {
@@ -168,12 +168,15 @@ if _rc {
 				}
 				else {
 					local truelabels = 0
-					qui levels `true', local(levels)
+					qui tab `true'
+					local ntrue = `r(r)'
+					qui levelsof `true', local(levels)
 					tokenize `"`levels'"'
 				
-					forvalues i = 1/`ntrue' {  
+					forvalues t = 1/`ntrue' {  
 					local `true'label`t' `t'
 					replace `true'calc = ``true'label`t'' if `true' == `t'
+					local `true'value`t' `t'
 					}
 				}
 				
@@ -190,14 +193,14 @@ if _rc {
 			}
 	}
 }
-
-
 else {
 	local ntrue = 1
 	local truevalue = `true'
-	local `true'value1 = `true'
-	local `true'label1 = `true'
-	local `true'number1 1
+	local truevalue1 = `true'
+	local truelabel1 = `true'
+	local truenumber1 1
+	qui gen truecalc = `true'
+	local true "true"
 }
 
 local dgmorig = "`dgm'"

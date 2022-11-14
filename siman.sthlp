@@ -1,5 +1,6 @@
 {smcl}
-{* *! version 0.3 13dec2021}{...}
+{* *! version 0.4 14nov2022}{...}
+{* version 0.3 13dec2021}{...}
 {* version 0.2 23June2020}{...}  
 {* version 0.1 04June2020}{...}
 {vieweralsosee "simsum (if installed)" "simsum"}{...}
@@ -106,11 +107,14 @@ for use with {bf:{help siman_lollyplot:siman lollyplot}}, {bf:{help siman_nestlo
 {title:Examples}
 
 
-{pstd} Use res.rda converted into a Stata dataset from {help siman##ruckerschwarzer:Rücker and Schwarzer, 2014}  
+{pstd} Use res.rda converted into a Stata dataset from {help siman##ruckerschwarzer:Rücker and Schwarzer, 2014}.  The example Stata dataset
+is available at: 
+
+{pstd} {browse "https://github.com/UCL/simansuite/tree/main/Ella_testing/nestloop/res.dta"}
 
 {pin}. {stata "siman setup, rep(v1) dgm(theta rho pc tau2 k) method(peto g2 limf peters trimfill) estimate(exp) se(var2) true(theta)"}
 
-{pin}. {stata "siman scatter"}
+{pin}. {stata "siman scatter, by(k)"}
 
 {pin}. {stata "siman analyse"}
 
@@ -146,9 +150,6 @@ Email {browse "mailto:ian.white@ucl.ac.uk":ian.white@ucl.ac.uk}.
 
 {pstd}Tim Morris, MRC Clinical  Trials Unit at UCL, London, UK. 
 Email {browse "mailto:tim.morris@ucl.ac.uk":tim.morris@ucl.ac.uk}.
-
-{pstd}You can get the latest version of this and my other Stata software using 
-{stata "net from http://github.com/emarleyzagar/"}
 
 
 {title:See Also}

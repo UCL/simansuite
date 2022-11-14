@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.5 11aug2022}{...}
+{* *! version 0.6 14nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
 {vieweralsosee "simsum (if installed)" "simsum"}{...}
 {viewerjumpto "Syntax" "siman_analyse##syntax"}{...}
@@ -35,13 +35,15 @@
 {marker perfmeas}{...}
 {syntab:Performance measure options:}
 
-{col 5}{bf:performancemeasures} {col 26} as per {help simsum:simsum}.  If none of the following options are specified, then all available performance measures are computed.
+{synopt:{opt performancemeasures} } as per {help simsum:simsum}.  If none of the following options are specified, then all available performance measures are computed.
 
 {synopt:{opt bsims} } reports the number of simulations with non-missing point estimates.
 
 {synopt:{opt sesims} } reports the number of simulations with non-missing standard errors.
 
 {synopt:{opt bias} } estimates the bias in the point estimates.
+
+{synopt:{opt mean} } the average (mean) of the point estimates.
 
 {synopt:{opt empse} } estimates the empirical standard error -- the standard deviation of the point estimates.
 
@@ -50,8 +52,12 @@
  slow: omitting it can reduce run time by up to 90%.
 
 {synopt:{opt mse} } estimates the mean squared error.
+
+{synopt:{opt rmse} } estimates the root mean squared error.
  
 {synopt:{opt modelse} } estimates the model-based standard error. 
+
+{synopt:{opt ciwidth} } estimates the width of the confidence interval at the specified level.
 
 {synopt:{opt relerror} } estimates the proportional error in the model-based standard error, using the empirical standard error 
 as gold standard.
@@ -60,21 +66,18 @@ as gold standard.
 
 {synopt:{opt power} } estimates the power to reject the null hypothesis that the true parameter is zero, at the specified level.
 
-{synopt:{opt mean} } the average (mean) of the point estimates.
-
-{synopt:{opt rmse} } estimates the root mean squared error (check with Ian).
-
-{synopt:{opt ciwidth} } estimates the width of the confidence interval at the specified level (check with Ian).
+{marker otheropts}{...}
+{syntab:Other options:}
 
 {pstd}
 {p_end}
-{col 5}{bf:perfonly} {col 26} the program will automatically append the performance measures data to the estimates data, unless the user specifies 
-{col 26} {it:perfonly} for performance measures only.
+{synopt:{opt perfonly} } the program will automatically append the performance measures data to the estimates data, unless the user specifies 
+{it:perfonly} for performance measures only.
 
 {pstd}
 {p_end}
-{col 5}{bf:replace} {col 26} if {cmd:siman analyse} has already been run and the user specifies it again then they must use the replace option, 
-{col 26} to replace the existing performance measures in the data set.
+{synopt:{opt replace} } if {cmd:siman analyse} has already been run and the user specifies it again then they must use the replace option, 
+to replace the existing performance measures in the data set.
 
 {synoptline}
 {p2colreset}{...}
@@ -90,6 +93,9 @@ will append the performance measures to the estimates data set, with the perform
 
 {pstd}
 Additionally the performance measure code (as listed above) and the dataset (estimates or performance) will be listed for each dataset row.
+
+{pstd}
+{help siman_analyse:siman analyse} will also calculate Monte-Carlo standard errors (mcses).  MSCEs quantify a measure of the simulation uncertainty.  They provide an estimate of the standard error of the performance measure, as a finite number of simulations are used.  For example, for the performance measure bias, the Monte-Carlo standard error would show the uncertainty around the estimate of the bias of all of the estimates over all of the simulations (i.e. for all in the estimates data set).
 
 
 {marker examples}{...}
@@ -128,8 +134,5 @@ Email: {browse "mailto:ian.white@ucl.ac.uk":Ian White}
 
 {pstd}Tim Morris, MRC Clinical  Trials Unit at UCL, London, UK.{break} 
 Email: {browse "mailto:tim.morris@ucl.ac.uk":Tim Morris}
-
-{pstd}You can get the latest version of this and my other Stata software using 
-{stata "net from http://github.com/emarleyzagar/"}
 
 

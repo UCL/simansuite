@@ -362,7 +362,7 @@ foreach var of local descriptors2 {
 		}
 	}
 	local levels`j' `levels'
-	local addplot text(`Svarname' 1 `"`varlabel' (`levelsnoquote')"', place(e) col(`legendcolor') size(`legendsize') justification(left) )
+	local addplot text(`Svarname' 1 `"`varlabel' (`levelsnoquote')"', place(e) col(`legendcolor') size(`legendsize') justification(left)) 
 	local addplots `addplots' `addplot'
 	local order `order' `j'
 }
@@ -430,12 +430,11 @@ if !mi(`"`options'"') {
 	}
 }
 
-set trace on
-set tracedepth 1
+
 * Took out	c(`connect' ...) from line `yvar' `xvar' `if' options and line `factorlist' `xvar' `if' options
 * as connector making the lines too thick, can not see detail
 
-di "`yvar'"
+*di "`yvar'"
 
 * graph
 #delimit ;

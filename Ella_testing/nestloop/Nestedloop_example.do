@@ -10,7 +10,7 @@ use res.dta, clear
 siman_setup, rep(v1) dgm(theta rho pc tau2 k) method(peto g2 limf peters trimfill) estimate(exp) se(var2) true(theta)
 siman_analyse
 * Recreating Gerta's graph, Figure 2
-siman_nestloop mean, dgmorder(-theta rho -pc tau2 -k)
+siman_nestloop mean, dgmorder(-theta rho -pc tau2 -k) lwidth(vthin ...) 
 siman_nestloop mean, dgmorder(-theta rho -pc tau2 -k) ylabel(0.2 0.5 1) ytitle("Odds ratio")
 siman_nestloop mean, dgmorder(-theta rho -pc tau2 -k) ylabel(0.2 0.5 1) ytitle("Odds ratio") name("test")
 

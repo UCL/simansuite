@@ -149,7 +149,7 @@ if _rc {
 				local `true'value1 = `r(levels)'
 				local `true'label1 = `r(levels)'
 				*local `true'number`truevalue' `truevalue'
-				replace `true'calc = `truevalue'
+				qui replace `true'calc = `truevalue'
 			}
 			else if `r(r)'>1 {
 				* Get true label values
@@ -162,7 +162,7 @@ if _rc {
 					forvalues t = 1/`ntrue' {  
 					gettoken `true'label`t' 0 : 0, parse(" ")
 					local `true'number`t' `t' 
-					replace `true'calc = ``true'label`t'' if `true' == `t'
+					qui replace `true'calc = ``true'label`t'' if `true' == `t'
 					local truelabels = 1
 					}
 				}
@@ -175,7 +175,7 @@ if _rc {
 				
 					forvalues t = 1/`ntrue' {  
 					local `true'label`t' `t'
-					replace `true'calc = ``true'label`t'' if `true' == `t'
+					qui replace `true'calc = ``true'label`t'' if `true' == `t'
 					local `true'value`t' `t'
 					}
 				}

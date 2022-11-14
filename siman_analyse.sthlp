@@ -35,7 +35,8 @@
 {marker perfmeas}{...}
 {syntab:Performance measure options:}
 
-{synopt:{opt performancemeasures} } as per {help simsum:simsum}.  If none of the following options are specified, then all available performance measures are computed.
+{pstd}
+As per {help simsum:simsum}.  If none of the following options are specified, then all available performance measures are computed.
 
 {synopt:{opt bsims} } reports the number of simulations with non-missing point estimates.
 
@@ -66,8 +67,8 @@ as gold standard.
 
 {synopt:{opt power} } estimates the power to reject the null hypothesis that the true parameter is zero, at the specified level.
 
-{marker otheropts}{...}
-{syntab:Other options:}
+{marker addopts}{...}
+{syntab:Additional options:}
 
 {pstd}
 {p_end}
@@ -89,13 +90,15 @@ to replace the existing performance measures in the data set.
 
 {pstd}
 {cmd:siman analyse} takes the imported estimates data from {bf:{help siman_setup:siman setup}} and creates performance measures data using the program {help simsum:simsum}.  By default {cmd:siman analyse}
-will append the performance measures to the estimates data set, with the performance measure names listed in the {bf:rep} column.
+will append the performance measures to the estimates data set, with the performance measure names listed in the {bf:repetition} column.
 
 {pstd}
 Additionally the performance measure code (as listed above) and the dataset (estimates or performance) will be listed for each dataset row.
 
 {pstd}
-{help siman_analyse:siman analyse} will also calculate Monte-Carlo standard errors (mcses).  MSCEs quantify a measure of the simulation uncertainty.  They provide an estimate of the standard error of the performance measure, as a finite number of simulations are used.  For example, for the performance measure bias, the Monte-Carlo standard error would show the uncertainty around the estimate of the bias of all of the estimates over all of the simulations (i.e. for all in the estimates data set).
+{cmd:siman analyse} will also calculate Monte-Carlo standard errors (mcses).  MSCEs quantify a measure of the simulation uncertainty.  They provide an estimate of the standard error of the performance measure, as a finite number of 
+simulations are used.  For example, for the performance measure bias, the Monte-Carlo standard error would show the uncertainty around the estimate of the bias of all of the estimates over all of the simulations 
+(i.e. for all in the estimates data set).
 
 
 {marker examples}{...}

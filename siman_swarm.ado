@@ -54,8 +54,7 @@ else foreach thing of local anything {
 	local varelement = "`thing'"
 	local varlist `varlist' `varelement'
 	}
-set trace on
-set tracedepth 1
+
 
 * if the user has not specified 'if' in the siman swarm syntax, but there is one from siman setup then use that 'if'
 if ("`if'"=="" & "`ifsetup'"!="") local ifswarm = `"`ifsetup'"'

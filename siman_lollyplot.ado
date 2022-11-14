@@ -1,4 +1,5 @@
-*! version 1.6   05sep2022
+*! version 1.7   14nov2022
+*  version 1.7   14nov2022   EMZ added bygraphoptions()
 *  version 1.6   05sep2022   EMZ bug fix to allow if target == "x"
 *  version 1.5   14july2022  EMZ fixed bug to allow name() in call 
 *  version 1.4   11july2022  EMZ changed pm and perfeascode to _pm and _perfmeascode
@@ -20,7 +21,7 @@ capture program drop siman_lollyplot
 program define siman_lollyplot, rclass
 version 15
 
-syntax [anything] [if] [,* GRaphoptions(string)]
+syntax [anything] [if] [,* GRaphoptions(string) BYGRaphoptions(string)]
 
 foreach thing in `_dta[siman_allthings]' {
     local `thing' : char _dta[siman_`thing']
@@ -254,7 +255,7 @@ if `:word count `r(levels)''!= 0 {
 		`refline' `spikes' `bounds' `scatters' 
 		,
 		by(`dgm', `rescale' legend(off) note("") imargin(tiny)
-			l1tit(`ytit', orientation(horizontal) width(21) justification(right))
+			l1tit(`ytit', orientation(horizontal) width(21) justification(right)) `bygraphoptions'
 		)
 		subtitle("")
 		ytit("")

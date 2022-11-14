@@ -112,6 +112,7 @@ siman_trellis cover
 siman_trellis, scheme(economist) ytitle("test y-title") xtitle("test x-title") bygraphoptions(title("main-title")) 
 siman_trellis, scheme(economist) ytitle("test y-title") xtitle("test x-title") bygraphoptions(title("main-title")) name("test")
 
+
 * test error messages
 use from_Tim_trellis\n500type1.dta, clear
 keep if method =="CC" | method=="LRD1" | method=="PMM1"

@@ -14,6 +14,12 @@ log using test_file_for_siman_data_progs.log, replace
 ***********************
 use long_long_formats\simlongESTPM_longE_longM.dta, clear
 siman_setup, rep(rep) dgm(dgm) target(estimand) method(method) estimate(est) se(se) true(true)
+
+gen dgm_new = "1"
+replace dgm_new = "2" if dgm == 2
+siman_setup, rep(rep) dgm(dgm_new) target(estimand) method(method) estimate(est) se(se) true(true)
+* error message as required
+siman_setup, rep(rep) dgm(dgm) target(estimand) method(method) estimate(est) se(se) true(true)
 siman_reshape, longwide
 siman_reshape, longlong                   
 siman_analyse

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.4 14nov2022}{...}
+{* *! version 0.5 21nov2022}{...}
 {* version 0.3 13dec2021}{...}
 {* version 0.2 23June2020}{...}  
 {* version 0.1 04June2020}{...}
@@ -7,7 +7,6 @@
 {viewerjumpto "Syntax" "siman##syntax"}{...}
 {viewerjumpto "Description" "siman##description"}{...}
 {viewerjumpto "Data and formats" "siman##formats"}{...}
-{viewerjumpto "Troubleshooting and limitations" "siman##limitations"}{...}
 {viewerjumpto "Examples" "siman##examples"}{...}
 {viewerjumpto "Details" "siman##details"}{...}
 {viewerjumpto "References" "siman##refs"}{...}
@@ -84,41 +83,22 @@ for use with {bf:{help siman_lollyplot:siman lollyplot}}, {bf:{help siman_nestlo
 
 {pstd}Data held in memory from {bf:{help siman_setup:siman setup}} can be reshaped in to either long-long format or long-wide format using {bf:{help siman_reshape:siman reshape}}.
 
-
-{marker limitations}{...}
-{title:Troubleshooting and limitations}
-
-
-{pstd}{bf:{help siman_reshape:siman reshape}} can only reshape a maximum of 10 variables, due to {help reshape} only allowing
-10 elements in the i() syntax. This can be mitigated by creating a group identifier.
-
-{pstd}For example, instead of:
-
-{pin} {stata "reshape wide est , i(rep scenario dgm severity CTE switchproportion treateffect switcherprog sfunccomp estimand perfmeascode) j(method 1 2)"}
-
-{pstd}use:
-
-{pin} {stata "egen i = group(rep scenario dgm severity CTE switchproportion treateffect switcherprog sfunccomp estimand perfmeascode)"}
-
-{pin} {stata "reshape wide est , i(i) j(method 1 2)"}
-
+{pstd}For troubleshooting and limitations, see {help siman_setup##limitations:troubleshooting and limitations}.
 
 {marker examples}{...}
 {title:Examples}
 
 
 {pstd} Use res.rda converted into a Stata dataset from {help siman##ruckerschwarzer:Rücker and Schwarzer, 2014}.  The example Stata dataset
-is available at: 
+is available {browse "https://github.com/UCL/simansuite/tree/main/Ella_testing/nestloop/res.dta":here}.
 
-{pstd} {browse "https://github.com/UCL/simansuite/tree/main/Ella_testing/nestloop/res.dta"}
+{phang}. {stata "siman setup, rep(v1) dgm(theta rho pc tau2 k) method(peto g2 limf peters trimfill) estimate(exp) se(var2) true(theta)"}
 
-{pin}. {stata "siman setup, rep(v1) dgm(theta rho pc tau2 k) method(peto g2 limf peters trimfill) estimate(exp) se(var2) true(theta)"}
+{phang}. {stata "siman scatter, by(k)"}
 
-{pin}. {stata "siman scatter, by(k)"}
+{phang}. {stata "siman analyse"}
 
-{pin}. {stata "siman analyse"}
-
-{pin}. {stata `"siman nestloop mean, dgmorder(-theta rho -pc tau2 -k) ylabel(0.2 0.5 1) ytitle("Odds ratio")"'}
+{phang}. {stata `"siman nestloop mean, dgmorder(-theta rho -pc tau2 -k) ylabel(0.2 0.5 1) ytitle("Odds ratio")"'}
 
 
 {title:Details}{marker details}

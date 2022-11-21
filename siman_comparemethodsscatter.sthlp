@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.3 28apr2022}{...}
+{* *! version 1.4 21nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
 {vieweralsosee "labelsof (if installed)" "labelsof"}{...}
 {viewerjumpto "Syntax" "siman_comparemethodsscatter##syntax"}{...}
@@ -21,7 +21,7 @@
 [{cmd:,}
 {it:options}]
 
-{pstd}Then the scatter graph will be drawn for estimate {it:and} se if the number of methods is <= 3.  Alternatively the user can select estimate {it:or} se for more than 3 methods.
+{pstd}The scatter graph will be drawn for estimate {it:and} se if the number of methods is <= 3.  Alternatively the user can select estimate {it:or} se for more than 3 methods.
 
 {synoptset 20 tabbed}{...}
 {synopthdr}
@@ -37,13 +37,13 @@ The {bf:if} option will only apply to {bf:dgm}, {bf:target} and {bf:method}.  Th
 
 {pstd}
 {p_end}
-{synopt:{opt by(string)}}  specifies the nesting of the variables.  The graphs will always be by {bf:dgm} as an unspecified default, the user can also additionally add {bf: by(target)}.  
+{synopt:{opt by(string)}}  specifies the nesting of the variables.  Only {bf: by(target)} is allowed for {cmd: siman comparemethodsscatter}.
 
 {syntab:Graph options}
 {pstd}
 {p_end}
 
-{pstd}{it:For the siman comparemethodsscatter graph user-inputted options, most of the valid options for {help scatter:scatter} are available.}
+{pstd}{it:For the siman comparemethodsscatter graph user-inputted options, most of the valid options for {help graph combine:graph combine} are available.}
 {p_end}
 {pstd} Additionally, if the user would like to change the appearance of the constituent graphs, {cmd: subgraphoptions()} can be used.
 {p_end}
@@ -61,7 +61,8 @@ The {bf:if} option will only apply to {bf:dgm}, {bf:target} and {bf:method}.  Th
 {title:Description}
 
 {pstd}
-{cmd:siman comparemethodsscatter} draws sets of scatter plots comparing the point estimates data or standard error data for various methods, where each point represents one repetition. 
+{cmd:siman comparemethodsscatter} draws sets of scatter plots comparing the point estimates data or standard error data for various methods, where each point represents one repetition. The data pairs come from the same repetition (ie. they are estimated in the same simulated dataset) and are compared to the line of equality.  These graphs help the user to look for correlations between methods and any systematic differences. Where more
+than two methods are compared, a graph of every method versus every other is plotted.
 
 {pstd}
 For up to 3 methods (inclusive), {bf:siman comparemethodsscatter} will plot both the estimate {it:and} the standard error. 
@@ -89,6 +90,9 @@ The {bf:labelsof} package (by Ben Jann) is required by {bf:siman comparemethodss
 {pstd}
 Please note that {help siman_setup:siman setup} needs to be run first before {bf:siman comparemethodsscatter}.
 
+{pstd}
+For further troubleshooting and limitations, see {help siman_setup##limitations:troubleshooting and limitations}.
+
 {marker examples}{...}
 {title:Examples}
 
@@ -111,9 +115,6 @@ Email: {browse "mailto:ian.white@ucl.ac.uk":Ian White}
 
 {pstd}Tim Morris, MRC Clinical  Trials Unit at UCL, London, UK.{break} 
 Email: {browse "mailto:tim.morris@ucl.ac.uk":Tim Morris}
-
-{pstd}You can get the latest version of this and my other Stata software using 
-{stata "net from http://github.com/emarleyzagar/"}
 
 
 {pstd}{helpb siman: Return to main help page for siman}

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.4 13jan2022}{...}
+{* *! version 0.5 21nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
 {viewerjumpto "Syntax" "siman_table##syntax"}{...}
 {viewerjumpto "Description" "siman_table##description"}{...}
@@ -50,13 +50,29 @@ See {help siman_analyse##perfmeas:performance measures} as per {help siman_analy
 
 {pstd}
 {cmd:siman table} uses the inbuilt Stata program {help tabdisp:tabdisp} to provide a summary of the performance measures created by {bf:{help siman_analyse:siman analyse}}.
-The output table lists the estimand(s) split by performance measure(s) and methods.
+The output table lists the estimand(s) split by performance measure(s), targets, dgms and methods with the default as follows:
+
+{pstd}
+Method will be placed in the columns and the other variables in the rows, unless
+the method variable is missing or only has one level.  In that case, target will be placed in the columns and the other variables in the rows, unless 
+target is missing or only has one level.  In that case the dgm will be put in the columns.
+
+{pstd}
+All of the above will hold unless there are more than 4 dgm and target levels, in which case {cmd: siman table} will be displayed as
+method versus performance measures only.
+
+{pstd}
+Where there are 2 entries per row in the table, the first entry is the performance measure value, 
+and the second is the Monte Carlo Standard Error (MCSE).  MSCEs quantify a measure of the simulation 
+uncertainty.  They provide an estimate of the standard error of the performance measure, as a finite 
+number of simulations are used.  For example, for the performance measure bias, the Monte Carlo standard 
+error would show the uncertainty around the estimate of the bias of all of the estimates over all of 
+the simulations (i.e. for all in the estimate data set).
 
 {pstd}
 {cmd:siman table} is called automatically by {bf:{help siman_analyse:siman analyse}}, 
 but can also be called on its own once the performance measures data 
 has been created by the {bf:siman} suite.
-
 
 {marker authors}{...}
 {title:Authors}
@@ -70,7 +86,5 @@ Email: {browse "mailto:ian.white@ucl.ac.uk":Ian White}
 {pstd}Tim Morris, MRC Clinical  Trials Unit at UCL, London, UK.{break} 
 Email: {browse "mailto:tim.morris@ucl.ac.uk":Tim Morris}
 
-{pstd}You can get the latest version of this and my other Stata software using 
-{stata "net from http://github.com/emarleyzagar/"}
 
 

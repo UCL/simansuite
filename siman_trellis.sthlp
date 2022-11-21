@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.4 24jan2022}{...}
+{* *! version 1.5 21nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
 {viewerjumpto "Syntax" "siman_trellis##syntax"}{...}
 {viewerjumpto "Description" "siman_trellis##description"}{...}
@@ -58,10 +58,11 @@ See {help siman_analyse##perfmeas:performance measures} as per {help siman_analy
 {title:Description}
 
 {pstd}
-{cmd:siman trellis} draws a plot of performance measures data.  It is a graphical presentation of method performance per data generating mechanism ({bf:dgm}) for each performance measure.  
+{cmd:siman trellis} draws a plot of performance measures data.  It is a graphical presentation of method performance per data generating mechanism ({bf:dgm}) for each true value. There is one line drawn per {bf:method}, and a different panel for 
+each dgm level.  The true value of beta is on the horizontal axis and the estimated performance measure on the vertical axis.
 
 {pstd}
-The graphs will be produced by {bf:dgm}, with one line drawn per {bf:method}.  {cmd:siman trellis} is intended for datasets that have more than 1 {bf:true} value.  
+{cmd:siman trellis} is intended for datasets that have more than 1 {bf:true} value.  
 
 {pstd}
 {bf:true} must be a {bf:variable} in the dataset for {cmd:siman trellis}, and should be listed in both the {bf:dgm()} and the {bf:true()}
@@ -69,6 +70,9 @@ options in {help siman setup:siman setup}.
 
 {pstd}
 Please note that {help siman_setup:siman setup} and {help siman_analyse:siman analyse} need to be run first before {bf:siman trellis}.
+
+{pstd}
+For further troubleshooting and limitations, see {help siman_setup##limitations:troubleshooting and limitations}.
 
 
 {marker examples}{...}
@@ -89,10 +93,6 @@ Email: {browse "mailto:ian.white@ucl.ac.uk":Ian White}
 
 {pstd}Tim Morris, MRC Clinical  Trials Unit at UCL, London, UK.{break} 
 Email: {browse "mailto:tim.morris@ucl.ac.uk":Tim Morris}
-
-{pstd}You can get the latest version of this and my other Stata software using 
-{stata "net from http://github.com/emarleyzagar/"}
-
 
 {p}{helpb siman: Return to main help page for siman}
 

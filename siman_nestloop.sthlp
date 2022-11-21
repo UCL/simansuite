@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1 20dec2021}{...}
+{* *! version 1.2 21nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
 {viewerjumpto "Syntax" "siman_nestloop##syntax"}{...}
 {viewerjumpto "Description" "siman_nestloop##description"}{...}
@@ -72,7 +72,8 @@ will display it's values on the graph in descending order.{p_end}
 {cmd:siman nestloop} draws a nested loop plot of performance measures data.
 
 {pstd}
-The nested loop plot presents all simulation results in one plot.  The performance measure is split by method and is stacked according to the levels of the data generating mechanisms along the horizontal axis. 
+The nested loop plot presents all simulation results in one plot.  The performance measure is split by method and is stacked according to the levels of the data generating mechanisms along the horizontal axis. The “nested-loop plot” 
+loops through nested data-generating mechanisms and plots results for different methods on top of each other in a full factorial design.
 
 {pstd}
 We recommend to sort the simulation dataset in such a way that the simulation parameter with the largest influence on the criterion 
@@ -85,18 +86,22 @@ options in {help siman setup:siman setup}.
 {pstd}
 Please note that {help siman_setup:siman setup} and {help siman_analyse:siman analyse} need to be run first before {bf:siman nestloop}.
 
+{pstd}
+For further troubleshooting and limitations, see {help siman_setup##limitations:troubleshooting and limitations}.
+
 {marker example}{...}
 {title:Example}
 
 {pstd} Re-creating the nestloop plot in Figure 2 from {help siman_nestloop##ruckerschwarzer:Rücker and Schwarzer, 2014}, found {browse "https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/1471-2288-14-129#Sec23":here}.
  
-{pstd} Use res.rda converted into a Stata dataset from {help siman_nestloop##ruckerschwarzer:Rücker and Schwarzer, 2014}  
+{pstd} Use res.rda converted into a Stata dataset from {help siman_nestloop##ruckerschwarzer:Rücker and Schwarzer, 2014}, which can be
+found {browse "https://github.com/UCL/simansuite/tree/main/Ella_testing/nestloop/res.dta":here}.
 
-{pin}. {stata "siman setup, rep(v1) dgm(theta rho pc tau2 k) method(peto g2 limf peters trimfill) estimate(exp) se(var2) true(theta)"}
+{phang}. {stata "siman setup, rep(v1) dgm(theta rho pc tau2 k) method(peto g2 limf peters trimfill) estimate(exp) se(var2) true(theta)"}
 
-{pin}. {stata "siman analyse"}
+{phang}. {stata "siman analyse"}
 
-{pin}. {stata `"siman nestloop mean, dgmorder(-theta rho -pc tau2 -k) ylabel(0.2 0.5 1) ytitle("Odds ratio")"'}
+{phang}. {stata `"siman nestloop mean, dgmorder(-theta rho -pc tau2 -k) ylabel(0.2 0.5 1) ytitle("Odds ratio")"'}
 
 {marker references}{...}
 {title:References}
@@ -121,9 +126,6 @@ Email: {browse "mailto:ian.white@ucl.ac.uk":Ian White}
 
 {pstd}Tim Morris, MRC Clinical  Trials Unit at UCL, London, UK.{break} 
 Email: {browse "mailto:tim.morris@ucl.ac.uk":Tim Morris}
-
-{pstd}You can get the latest version of this and my other Stata software using 
-{stata "net from http://github.com/emarleyzagar/"}
 
 {pstd}{helpb siman: Return to main help page for siman}
 

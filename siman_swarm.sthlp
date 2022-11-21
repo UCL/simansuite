@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.2 20dec2021}{...}
+{* *! version 1.3 21nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
 {vieweralsosee "labelsof (if installed)" "labelsof"}{...}
 {viewerjumpto "Syntax" "siman_swarm##syntax"}{...}
@@ -16,7 +16,7 @@
 {title:Syntax}
 
 {p 8 17 2}
-{cmdab:siman swarm} {ifin}
+{cmdab:siman swarm} [estimate|se] {ifin}
 [{cmd:,}
 {it:options}]
 
@@ -36,7 +36,8 @@ The {it:if} option will only apply to {bf:dgm}, {bf:target} and {bf:method}.  Th
 
 {pstd}
 {p_end}
-{synopt:{opt by(string)}}  specifies the nesting of the variables, with the default being {bf:by(dgm target method)}
+{synopt:{opt by(string)}}  specifies the nesting of the variables, only {bf:by(dgm)} is allowed for {cmd: siman swarm} for 
+example when dgm is defined by more than one variable.  The user is able to use the {it:if} statement to filter on target.
 
 {syntab:Graph options}
 {pstd}
@@ -60,12 +61,18 @@ The {it:if} option will only apply to {bf:dgm}, {bf:target} and {bf:method}.  Th
 {p_end}
 {synopt:{opt graphop:tions(string)}}  graph options for the overall graphical display
 
+{pstd}
+{p_end}
+{synopt:{opt combine:graphoptions(string)}}  graph options for combining the constituent graphs, see {help graph combine:graph combine}.
+
 
 {marker description}{...}
 {title:Description}
 
 {pstd}
-{cmd:siman swarm} draws a swarm plot of the estimates data variables, the results of which are from analysing multiple simulated data sets with data relating to different statistics (e.g. point estimate, p-value) for each simulated data set.
+{cmd:siman swarm} draws a swarm plot of the estimates or the standard error data by method, the results of which are from analysing multiple simulated data sets.  The vertical axis is repetition number, to provide some separation between 
+the points, with sample means in the middle. The {cmd: siman swarm} graphs help to inspect the distribution and, 
+in particular, to look for outliers in the data.
 
 {pstd}
 Please note that {help siman_setup:siman setup} needs to be run first before siman swarm.  If the data is not already in long-long format then it will be reshaped to this format to create the graphs 
@@ -80,6 +87,9 @@ format types and the reshape command).
 
 {pstd}
 The {cmd:labelsof} package (by Ben Jann) is required by siman swarm, which can be installed by clicking: {stata ssc install labelsof}
+
+{pstd}
+For further troubleshooting and limitations, see {help siman_setup##limitations:troubleshooting and limitations}.
 
 
 {marker examples}{...}
@@ -100,9 +110,6 @@ Email: {browse "mailto:ian.white@ucl.ac.uk":Ian White}
 
 {pstd}Tim Morris, MRC Clinical  Trials Unit at UCL, London, UK.{break} 
 Email: {browse "mailto:tim.morris@ucl.ac.uk":Tim Morris}
-
-{pstd}You can get the latest version of this and my other Stata software using 
-{stata "net from http://github.com/emarleyzagar/"}
 
 
 {pstd}{helpb siman: Return to main help page for siman}

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.6 14nov2022}{...}
+{* *! version 0.7 21nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
 {vieweralsosee "simsum (if installed)" "simsum"}{...}
 {viewerjumpto "Syntax" "siman_analyse##syntax"}{...}
@@ -100,6 +100,8 @@ Additionally the performance measure code (as listed above) and the dataset (est
 simulations are used.  For example, for the performance measure bias, the Monte-Carlo standard error would show the uncertainty around the estimate of the bias of all of the estimates over all of the simulations 
 (i.e. for all in the estimates data set).
 
+{pstd}
+For further troubleshooting and limitations, see {help siman_setup##limitations:troubleshooting and limitations}.
 
 {marker examples}{...}
 {title:Examples}

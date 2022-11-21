@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1 20dec2021}{...}
+{* *! version 1.2 21nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
 {viewerjumpto "Syntax" "siman_scatter##syntax"}{...}
 {viewerjumpto "Description" "siman_scatter##description"}{...}
@@ -8,14 +8,14 @@
 {title:Title}
 
 {phang}
-{bf:siman scatter} {hline 2} Scatter plot of point estimate vs standard error data.
+{bf:siman scatter} {hline 2} Scatter plot of point estimate versus standard error data.
 
 
 {marker syntax}{...}
 {title:Syntax}
 
 {p 8 17 2}
-{cmdab:siman scatter} {ifin}
+{cmdab:siman scatter} [estimate|se] {ifin}
 [{cmd:,}
 {it:options}]
 
@@ -54,10 +54,13 @@ The {it:if} option will only apply to {bf:dgm}, {bf:target} and {bf:method}.  Th
 {pstd}
 {cmd:siman scatter} draws a scatter plot of the point estimates data versus the standard error data, the results of which are 
 from analysing multiple simulated data sets with data relating to different statistics (e.g. point estimate) 
-for each simulated data set.
+for each simulated data set.  The {cmd:siman scatter} plots help the user to look for bivariate outliers.
 
 {pstd}
 Please note that {help siman_setup:siman setup} needs to be run first before siman scatter.
+
+{pstd}
+For further troubleshooting and limitations, see {help siman_setup##limitations:troubleshooting and limitations}.
 
 
 {marker example}{...}
@@ -76,10 +79,6 @@ Email: {browse "mailto:ian.white@ucl.ac.uk":Ian White}
 
 {pstd}Tim Morris, MRC Clinical  Trials Unit at UCL, London, UK.{break} 
 Email: {browse "mailto:tim.morris@ucl.ac.uk":Tim Morris}
-
-{pstd}You can get the latest version of this and my other Stata software using 
-{stata "net from http://github.com/emarleyzagar/"}
-
 
 {pstd}{helpb siman: Return to main help page for siman}
 

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.3 14feb2021}{...}
+{* *! version 0.4 21nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
 {viewerjumpto "Syntax" "siman_reshape##syntax"}{...}
 {viewerjumpto "Description" "siman_reshape##description"}{...}
@@ -8,7 +8,6 @@
 
 {phang}
 {bf:siman reshape} {hline 2} Reshapes data in the siman suite
-
 
 {marker syntax}{...}
 {title:Syntax}
@@ -34,6 +33,8 @@ Please note that {bf:{help siman_setup:siman setup}} will automatically reshape 
 (i.e. wide targets, long methods) into long-wide format.  The reshaped data set is held in memory.
 There is also an auto-summary output available for the user to confirm the data set up (using  {bf:{help siman_describe:siman describe}}).
 
+{pstd}
+For troubleshooting and limitations, see {help siman_setup##limitations:troubleshooting and limitations}.
 
 {marker authors}{...}
 {title:Authors}
@@ -46,10 +47,6 @@ Email: {browse "mailto:ian.white@ucl.ac.uk":Ian White}
 
 {pstd}Tim Morris, MRC Clinical  Trials Unit at UCL, London, UK.{break} 
 Email: {browse "mailto:tim.morris@ucl.ac.uk":Tim Morris}
-
-{pstd}You can get the latest version of this and my other Stata software using 
-{stata "net from http://github.com/emarleyzagar/"}
-
 
 {pstd}{helpb siman: Return to main help page for siman}
 

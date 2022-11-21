@@ -1,6 +1,7 @@
 {smcl}
-{* *! version 1.2 22dec2021}{...}
+{* *! version 1.3 21nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
+{vieweralsosee "labelsof (if installed)" "labelsof"}{...}
 {viewerjumpto "Syntax" "siman_zipplot##syntax"}{...}
 {viewerjumpto "Description" "siman_zipplot##description"}{...}
 {viewerjumpto "Examples" "siman_zipplot##examples"}{...}
@@ -74,22 +75,28 @@ The {it:if} option will only apply to {bf:dgm}, {bf:target} and {bf:method}.  Th
 
 {pstd}
 {cmd:siman zipplot} draws a "zip plot" plot of the confidence interval coverage for each data-generating mechanism 
-and analysis method in the estimates data, the results of which are from analysing multiple simulated data sets with 
-data relating to different statistics (e.g. point estimate, p-value) for each simulated data set.  Both Monte Carlo 
+and analysis method in the estimates dataset. Both Monte Carlo 
 confidence intervals for percent coverage and 95% confidence intervals for individual repetitions are shown. For coverage 
-(or type I error), true θ is used for the null value.  
+(or type I error), true θ is used for the null value.
 
 {pstd}
 For each data-generating mechanism and method, the confidence intervals are fractional-centile-ranked (see {help siman_zipplot##Morris19:Morris et al., 2019)}. 
 This ranking is used for the vertical axis and is plotted against the intervals themselves. Intervals which cover the true value 
 are coverers (at the bottom); those which do not cover are called non-coverers (at the top). Both coverers and non-coverers are 
 shown on the plot, along with the point estimates.
+The zipplot provides a means of understanding any issues with coverage by viewing the confidence intervals directly.  
 
 {pstd}
 Please note that {help siman_setup:siman setup} needs to be run first before siman zipplot.
 
 {pstd}
+The {cmd:labelsof} package (by Ben Jann) is required by siman swarm, which can be installed by clicking: {stata ssc install labelsof}
+
+{pstd}
 siman zipplot requires a true variable in the estimates dataset defined in the {help siman_setup:siman setup} syntax by {bf:true()}. 
+
+{pstd}
+For further troubleshooting and limitations, see {help siman_setup##limitations:troubleshooting and limitations}.
  
 
 {marker examples}{...}
@@ -123,9 +130,9 @@ Email: {browse "mailto:ian.white@ucl.ac.uk":Ian White}
 {pstd}Tim Morris, MRC Clinical  Trials Unit at UCL, London, UK.{break} 
 Email: {browse "mailto:tim.morris@ucl.ac.uk":Tim Morris}
 
-{pstd}You can get the latest version of this and my other Stata software using 
-{stata "net from http://github.com/emarleyzagar/"}
-
-
 {pstd}{helpb siman: Return to main help page for siman}
+
+{title:See Also}
+
+{pstd}{help labelsof} (if installed)
 

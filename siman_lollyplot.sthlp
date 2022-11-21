@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.3 16may2022}{...}
+{* *! version 1.4 21nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
 {vieweralsosee "Main simsum help page" "simsum"}{...}
 {viewerjumpto "Syntax" "siman_lollyplot##syntax"}{...}
@@ -54,7 +54,11 @@ See {help siman_analyse##perfmeas:performance measures} as per {help siman_analy
 {p_end}
 {synopt:{opt gr:aphoptions(string)}}  graph options for the constituent performance measure graphs.
 
-{pstd}{it:For the siman lollyplot graph user-inputted options, most of the valid options for {help scatter:scatter} are available.}
+{pstd}
+{p_end}
+{synopt:{opt bygr:aphoptions(string)}}  graph options for the nesting of the graphs.
+
+{pstd}{it:For the siman lollyplot graph user-inputted options, most of the valid options for {help graph combine:graph combine} are available.}
 
 
 {marker description}{...}
@@ -71,6 +75,8 @@ The graphs will be produced by {bf:dgm}, with one point/line drawn per {bf:metho
 {pstd}
 Please note that {help siman_setup:siman setup} and {help siman_analyse:siman analyse} need to be run first before {bf:siman lollyplot}.
 
+{pstd}
+For further troubleshooting and limitations, see {help siman_setup##limitations:troubleshooting and limitations}.
 
 {marker examples}{...}
 {title:Examples}
@@ -97,9 +103,6 @@ Email: {browse "mailto:ian.white@ucl.ac.uk":Ian White}
 
 {pstd}Tim Morris, MRC Clinical  Trials Unit at UCL, London, UK.{break} 
 Email: {browse "mailto:tim.morris@ucl.ac.uk":Tim Morris}
-
-{pstd}You can get the latest version of this and my other Stata software using 
-{stata "net from http://github.com/emarleyzagar/"}
 
 
 {pstd}{helpb siman: Return to main help page for siman}

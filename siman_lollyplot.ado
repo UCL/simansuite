@@ -1,10 +1,11 @@
-*! version 1.7   14nov2022
-*  version 1.7   14nov2022   EMZ added bygraphoptions()
-*  version 1.6   05sep2022   EMZ bug fix to allow if target == "x"
-*  version 1.5   14july2022  EMZ fixed bug to allow name() in call 
-*  version 1.4   11july2022  EMZ changed pm and perfeascode to _pm and _perfmeascode
+*! version 1.8   05dec2022
+*  version 1.8   05dec2022   TM added 'rows(1)' so that dgms all appear on 1 row.
+*  version 1.7   14nov2022   EMZ added bygraphoptions().
+*  version 1.6   05sep2022   EMZ bug fix to allow if target == "x".
+*  version 1.5   14july2022  EMZ fixed bug to allow name() in call. 
+*  version 1.4   11july2022  EMZ changed pm and perfeascode to _pm and _perfmeascode.
 *  version 1.3   16may2022   EMZ bug fixing with graphical displays.  Added in graphoptions() for constituent graph options.
-*  version 1.2   24mar2022   EMZ further updates from IW testing
+*  version 1.2   24mar2022   EMZ further updates from IW testing.
 *  version 1.1   10jan2021   EMZ updates from IW testing (bug fix).
 *  version 1.0   09Dec2020   Ella Marley-Zagar, MRC Clinical Trials Unit at UCL. Based on Tim Morris' simulation tutorial do file.
 * File to produce the lollyplot
@@ -254,7 +255,7 @@ if `:word count `r(levels)''!= 0 {
 	twoway
 		`refline' `spikes' `bounds' `scatters' 
 		,
-		by(`dgm', `rescale' legend(off) note("") imargin(tiny)
+		by(`dgm', rows(1) `rescale' legend(off) note("") imargin(tiny)
 			l1tit(`ytit', orientation(horizontal) width(21) justification(right)) `bygraphoptions'
 		)
 		subtitle("")

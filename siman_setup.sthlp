@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.5 21nov2022}{...}
+{* *! version 0.6 28nov2022}{...}
 {vieweralsosee "Main siman help page" "siman"}{...}
 {viewerjumpto "Data formats" "siman_setup##data"}{...}
 {viewerjumpto "Syntax" "siman_setup##syntax"}{...}
@@ -121,13 +121,13 @@ clear
 {synopt:{opt dgm(varlist)}}data generating mechanism.{p_end}
 {synopt:{opt tar:get(varname|values)}}the target variable name or values.{p_end}
 {synopt:{opt meth:od(varname|values)}}the method variable name or values.{p_end}
-{synopt:{opt est:imate(varname|stub_varname)}}the estimate variable name or the name of it's stub if in wide format.{p_end}
-{synopt:{opt se(varname|stub_varname)}}the standard error variable name or the name of it's stub if in wide format.{p_end}
-{synopt:{opt df(varname|stub_varname)}}the degrees of freedom variable name or the name of it's stub if in wide format.{p_end}
-{synopt:{opt lci(varname|stub_varname)}}the lower confidence interval variable name or the name of it's stub if in wide format.{p_end}
-{synopt:{opt uci(varname|stub_varname)}}the upper confidence interval variable name or the name of it's stub if in wide format.{p_end}
-{synopt:{opt p(varname|stub_varname)}}the p-value variable name or the name of it's stub if in wide format.{p_end}
-{synopt:{opt true(#|varname|stub_varname)}}the true value, or variable name or the name of it's stub if in wide format.{p_end}
+{synopt:{opt est:imate(varname|stub_varname)}}the estimate variable name or the name of its stub if in wide format.{p_end}
+{synopt:{opt se(varname|stub_varname)}}the standard error variable name or the name of its stub if in wide format.{p_end}
+{synopt:{opt df(varname|stub_varname)}}the degrees of freedom variable name or the name of its stub if in wide format.{p_end}
+{synopt:{opt lci(varname|stub_varname)}}the lower confidence interval variable name or the name of its stub if in wide format.{p_end}
+{synopt:{opt uci(varname|stub_varname)}}the upper confidence interval variable name or the name of its stub if in wide format.{p_end}
+{synopt:{opt p(varname|stub_varname)}}the p-value variable name or the name of its stub if in wide format.{p_end}
+{synopt:{opt true(#|varname|stub_varname)}}the true value, or variable name or the name of its stub if in wide format.{p_end}
 {synopt:{opt ord:er(varname)}}if in wide-wide format, this will be either {it:target} or {it:method}, 
 denoting that either the target stub is first or the method stub is first in the variable names.{p_end}
 

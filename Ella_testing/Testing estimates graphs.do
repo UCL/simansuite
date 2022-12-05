@@ -34,6 +34,23 @@ gen true = -0.5
 siman_setup, rep(rep) dgm(dgm) target(estimand) method(method) estimate(est) se(se) true(true)
 siman_zipplot
 
+
+* Check dgm labels when dgm numeric with string labels
+clear all
+prog drop _all
+cd N:\My_files\siman\Ian_example\
+use long_long_formats\simlongESTPM_longE_longM.dta, clear
+label define dgmvar 1 "A" 2 "B"
+label values dgm dgmvar
+label define methodvar 1 "X" 2 "Y"
+label values method methodvar
+siman_setup, rep(rep) dgm(dgm) target(estimand) method(method) estimate(est) se(se) true(true)
+siman scatter                  
+siman zipplot                  
+siman swarm                   
+siman comparemethodsscatter    /****check here ****/
+
+
 * Different true values per target
 use long_long_formats\simlongESTPM_longE_longM.dta, clear
 replace true=0.5 if estimand=="beta"

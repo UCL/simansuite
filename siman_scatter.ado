@@ -1,4 +1,5 @@
-*! version 1.4   12sep2022
+*! version 1.5   05dec2022
+*  version 1.5   05dec2022   EMZ fixed bug so that dgm labels are used when 1 dgm variable, and scatter plots for each dgm when true not part of dgm *                            structure.
 *  version 1.4   12sep2022   EMZ added to code so now allows scatter graphs split out by every dgm variable and level if multiple dgm variables declared.
 *  version 1.3   05sep2022   EMZ added additional error message.
 *  version 1.2   14july2022  EMZ. Tidied up graph labels if 'by' option used.  Fixed bug if more than 1 dgm variable used.  Fixed bug so name() allowed if *                            user specifies.
@@ -107,15 +108,39 @@ if `numberdgms'==1 {
 }
 if `numberdgms'!=1 local ndgmlabels = `numberdgms'
 
+
+/*
 *create a variable with DGM = `dgm', Target = `target' and Method = `method' for use in the graphs
 foreach var of varlist `dgm' `target'  `method' {
-	tempvar `var'equals
-	qui gen ``var'equals' = "`var' = "
-	tempvar `var'title
-	qui egen ``var'title' = concat(``var'equals' `var')
-	local `var'title ``var'title'
-*if "`by'"=="`var'" local by ``var'title'
+/*	
+	if `numberdgms'==1 {
+		local `var'labelindi=0
+		cap qui labelsof `var'
+		cap qui ret list
+		if !mi("`r(labels)'") local `var'labelindi=1	
+					
+				
+		tempvar `var'label`var'
+		if ``var'labelindi'== 1 qui decode `var', gen(``var'label`var'')
+		else qui gen ``var'label`var'' = `var'
+		
+		
+		tempvar `var'equals
+		qui gen ``var'equals' = "`var' = "
+		tempvar `var'title
+		qui egen ``var'title' = concat(``var'equals' ``var'label`var'')
+		if "`by'"=="" local by = "``var'title`var''"
+	} 
+	else {*/
+		tempvar `var'equals
+		qui gen ``var'equals' = "`var' = "
+		tempvar `var'title
+		qui egen ``var'title' = concat(``var'equals' `var')
+		local `var'title ``var'title'
+		*if "`by'"=="`var'" local by ``var'title'
+*	}
 }
+
 
 if !mi("`by'") {
     local bycount: word count `by'
@@ -126,14 +151,53 @@ if !mi("`by'") {
 		}
 		local by `bylist'
 }
+*/
 
+if !mi("`by'") {
+	local byvar = "`by'"
+}
+else local byvar `dgm' `target' `method'
+
+
+foreach var in `byvar' { 
+		
+	if `numberdgms'==1 {
+		
+			local `var'labelindi=0
+			cap qui labelsof `var'
+			cap qui ret list
+			if !mi("`r(labels)'") local `var'labelindi=1	
+			
+		
+			tempvar label`var'
+			if ``var'labelindi'== 1 qui decode `var', gen(label`var')
+			else qui gen label`var' = `var'
+			tempvar `var'equals
+			qui gen ``var'equals' = "`var': "
+			tempvar `var'title
+					
+			qui egen ``var'title' = concat(``var'equals' label`var')
+			
+	} 
+	else {			
+			
+			tempvar label`var'
+			qui gen `label`var'' = `var'
+			
+			tempvar `var'equals
+			qui gen ``var'equals' = "`var': "
+			tempvar title`var'
+			qui egen `title`var'' = concat(``var'equals' `label`var'')
+			local byvar = "`title`var''"
+	}
+}
 
 
 * scatter plot
 
 * if dgm is defined by multiple variables, default is to plot scatter graphs for each dgm variable, split out by each level
 
-if `numberdgms'!=1 & mi("`by'") & mi("`if'") {
+if `numberdgms'!=1 & mi("`if'") {
 	
 	foreach dgmvar in `dgm' {
 		twoway scatter `varlist', msym(o) msize(small) mcol(%30) by(`dgmvar', note("") `bygraphoptions') name(simanscatter_dgm_`dgmvar') `options'
@@ -142,8 +206,8 @@ if `numberdgms'!=1 & mi("`by'") & mi("`if'") {
 * if dgm is defined by 1 variable
 else {
 	
-	if "`by'"=="" & `ndgmlabels' == 1 local by `target' `methodtitle' 
-	else if "`by'"=="" & `ndgmlabels' != 1 local by `dgmtitle' `target' `methodtitle'
+	if "`by'"=="" & `ndgmlabels' == 1 local byvar `target' `methodtitle' 
+	else if "`by'"=="" & `ndgmlabels' != 1 local byvar `dgmtitle' `target' `methodtitle'
 	local name = "name(simanscatter, replace)"
 
 	* Can't tokenize/substr as many "" in the string
@@ -160,7 +224,7 @@ else {
 	}
 	
 	
-	twoway scatter `varlist', msym(o) msize(small) mcol(%30) by(`by', note("") `bygraphoptions') `name' `options' 
+	twoway scatter `varlist', msym(o) msize(small) mcol(%30) by(`byvar', note("") `bygraphoptions') `name' `options' 
 }
 
 restore

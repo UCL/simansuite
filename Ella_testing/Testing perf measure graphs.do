@@ -134,6 +134,7 @@ siman_trellis
 
 clear all
 prog drop _all
+cd N:\My_files\siman\Ian_example\
 use from_Tim_trellis\n500type1.dta, clear
 keep if method =="CC" | method=="LRD1" | method=="PMM1"
 qui gen se = sqrt(var)

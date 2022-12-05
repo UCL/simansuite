@@ -1,4 +1,5 @@
-*! version 0.6   11july2022
+*! version 0.7   05dec2022
+*  version 0.7   05dec2022     EMZ removed 'if' option, as already applied by siman analyse to the data (otherwise applying it twice).
 *  version 0.6   11july2022    EMZ changed generated variables to have _ infront
 *  version 0.5   04apr2022     EMZ changes to the default column/row and fixed bug in col() option.
 *  version 0.4   06dec2021     EMZ changes to the ordering of performance measures in the table (from TM testing).  Allowed subset of perf measures to be *                                  selected for the table display.
@@ -71,13 +72,15 @@ if !mi("`if'") {
 	}
 }
 
+/*
+Don't need the below as siman analyse will have already applied this to the data
 * if the user has not specified 'if' in the siman table syntax, but there is one from siman analyse then use that 'if'
 if ("`if'"=="" & "`ifanalyse'"!="") local if = `"`ifanalyse'"'
 tempvar touse
 qui generate `touse' = 0
 qui replace `touse' = 1 `if' 
 qui keep if `touse'
-
+*/
 
 * use tabdisp command to tabulate performance measures, est and se  
 qui drop if `rep'>0

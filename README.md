@@ -4,7 +4,7 @@
 
 Latest version available here:
 
-<a href ="https://github.com/UCL/siman/"><siman>
+<a href ="https://github.com/UCL/siman/">siman</a>
 
 The siman programs presented at the London Stata Conference September 2022 used to be contained in this folder.  
 They have since been updated and are in the UCL/siman repository above.

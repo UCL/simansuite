@@ -4,4 +4,4 @@
 
 Latest version available here:
 
-<a href ="https://github.com/UCL/siman/"><txt = "siman">
+<a href ="https://github.com/UCL/siman/"><siman>
